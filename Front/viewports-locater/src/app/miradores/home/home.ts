@@ -122,15 +122,21 @@ export class Home implements OnInit {
         );
       }
 
-      // 3. Filter by provincia client-side (provincia is embedded in the base response)
+      // 3. Filter by provincia (API-assisted: provincia is not embedded in the base response)
       if (this.provinciaId !== '') {
-        base = base.filter(m => m.provincia?.id === this.provinciaId);
+        const provinciaMiradores = await firstValueFrom(
+          this.miradorService.miradoresPorProvincia(this.provinciaId as number)
+        ).then(d => d ?? []);
+        const provinciaIds = new Set(provinciaMiradores.filter(m => m?.id != null).map(m => m.id));
+        base = base.filter(m => provinciaIds.has(m.id));
       }
 
       // 4. Filter by dificultad (backend-assisted: dificultad lives on rutas, not miradores)
       if (this.dificultad !== '') {
-        const difMiradores = await firstValueFrom(this.miradorService.miradoresPorDificultad(this.dificultad)).then(d => (d ?? []).filter(m => m?.id != null));
-        const difIds = new Set(difMiradores.map(m => m.id));
+        const difMiradores = await firstValueFrom(
+          this.miradorService.miradoresPorDificultad(this.dificultad)
+        ).then(d => d ?? []);
+        const difIds = new Set(difMiradores.filter(m => m?.id != null).map(m => m.id));
         base = base.filter(m => difIds.has(m.id));
       }
 

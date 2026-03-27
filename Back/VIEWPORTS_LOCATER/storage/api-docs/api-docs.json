@@ -1,0 +1,1609 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Viewports Locater API",
+        "description": "Documentacion de la API",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:8000",
+            "description": "Servidor local"
+        }
+    ],
+    "paths": {
+        "/api/fotos": {
+            "get": {
+                "tags": [
+                    "Fotos"
+                ],
+                "summary": "Listar todas las fotos",
+                "operationId": "getFotos",
+                "responses": {
+                    "200": {
+                        "description": "Lista de fotos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Foto"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Fotos"
+                ],
+                "summary": "Crear una nueva foto",
+                "operationId": "storeFoto",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "url",
+                                    "mirador_id"
+                                ],
+                                "properties": {
+                                    "url": {
+                                        "type": "string",
+                                        "maxLength": 500,
+                                        "example": "https://ejemplo.com/foto.jpg"
+                                    },
+                                    "fecha_subida": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-06-15",
+                                        "nullable": true
+                                    },
+                                    "mirador_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Foto creada correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Foto"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    }
+                }
+            }
+        },
+        "/api/fotos/{id}": {
+            "get": {
+                "tags": [
+                    "Fotos"
+                ],
+                "summary": "Obtener una foto por ID",
+                "operationId": "showFoto",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Datos de la foto",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Foto"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Foto no encontrada"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Fotos"
+                ],
+                "summary": "Actualizar una foto existente",
+                "operationId": "updateFoto",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "url": {
+                                        "type": "string",
+                                        "maxLength": 500,
+                                        "example": "https://ejemplo.com/nueva-foto.jpg"
+                                    },
+                                    "fecha_subida": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2024-07-01",
+                                        "nullable": true
+                                    },
+                                    "mirador_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Foto actualizada correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Foto"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Foto no encontrada"
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Fotos"
+                ],
+                "summary": "Eliminar una foto",
+                "operationId": "destroyFoto",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Foto eliminada correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Foto eliminada correctamente"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Foto no encontrada"
+                    }
+                }
+            }
+        },
+        "/api/miradores/{mirador}/fotos": {
+            "get": {
+                "tags": [
+                    "Fotos"
+                ],
+                "summary": "Listar fotos de un mirador",
+                "operationId": "getFotosPorMirador",
+                "parameters": [
+                    {
+                        "name": "mirador",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de fotos del mirador",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Foto"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Mirador no encontrado"
+                    }
+                }
+            }
+        },
+        "/api/miradores": {
+            "get": {
+                "tags": [
+                    "Miradores"
+                ],
+                "summary": "Listar todos los miradores",
+                "operationId": "getMiradores",
+                "responses": {
+                    "200": {
+                        "description": "Lista de miradores con sus tags",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Mirador"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Miradores"
+                ],
+                "summary": "Crear un nuevo mirador",
+                "operationId": "storeMirador",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nombre",
+                                    "latitud",
+                                    "longitud",
+                                    "provincia_id"
+                                ],
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string",
+                                        "maxLength": 150,
+                                        "example": "Mirador del Tibidabo"
+                                    },
+                                    "descripcion": {
+                                        "type": "string",
+                                        "example": "Vistas panorámicas de Barcelona",
+                                        "nullable": true
+                                    },
+                                    "latitud": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 41.4236
+                                    },
+                                    "longitud": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 2.1197
+                                    },
+                                    "provincia_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Mirador creado correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "mirador": {
+                                            "$ref": "#/components/schemas/Mirador"
+                                        },
+                                        "provincia": {
+                                            "$ref": "#/components/schemas/Provincia"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    }
+                }
+            }
+        },
+        "/api/miradores/buscar": {
+            "get": {
+                "tags": [
+                    "Miradores"
+                ],
+                "summary": "Buscar miradores por nombre",
+                "operationId": "buscarMiradorPorNombre",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 150,
+                            "minLength": 1
+                        },
+                        "example": "Tibidabo"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Miradores que coinciden con la búsqueda",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Mirador"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    }
+                }
+            }
+        },
+        "/api/miradores/tags": {
+            "post": {
+                "tags": [
+                    "Miradores"
+                ],
+                "summary": "Filtrar miradores por tags (debe tener TODOS los tags indicados)",
+                "operationId": "getMiradoresPorTags",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "tags"
+                                ],
+                                "properties": {
+                                    "tags": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            1,
+                                            2
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Miradores que tienen todos los tags indicados",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Mirador"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    }
+                }
+            }
+        },
+        "/api/miradores/provincia/{provincia}": {
+            "get": {
+                "tags": [
+                    "Miradores"
+                ],
+                "summary": "Listar miradores de una provincia",
+                "operationId": "getMiradoresPorProvincia",
+                "parameters": [
+                    {
+                        "name": "provincia",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Miradores de la provincia indicada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Mirador"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Provincia no encontrada"
+                    }
+                }
+            }
+        },
+        "/api/miradores/dificultad/{dificultad}": {
+            "get": {
+                "tags": [
+                    "Miradores"
+                ],
+                "summary": "Listar miradores filtrados por dificultad de sus rutas",
+                "operationId": "getMiradoresPorDificultad",
+                "parameters": [
+                    {
+                        "name": "dificultad",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "facil",
+                                "media",
+                                "dificil"
+                            ]
+                        },
+                        "example": "media"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Miradores con rutas de la dificultad indicada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Mirador"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/miradores/radio": {
+            "post": {
+                "tags": [
+                    "Miradores"
+                ],
+                "summary": "Listar miradores dentro de un radio (km) desde una coordenada",
+                "operationId": "getMiradoresPorRadio",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "latitud",
+                                    "longitud",
+                                    "radio"
+                                ],
+                                "properties": {
+                                    "latitud": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 41.3851
+                                    },
+                                    "longitud": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 2.1734
+                                    },
+                                    "radio": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 50
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Miradores dentro del radio indicado con su distancia",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Mirador"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    }
+                }
+            }
+        },
+        "/api/miradores/ordenar/valoracion": {
+            "get": {
+                "tags": [
+                    "Miradores"
+                ],
+                "summary": "Listar miradores ordenados por valoración media",
+                "operationId": "getMiradoresOrdenadosPorValoracion",
+                "responses": {
+                    "200": {
+                        "description": "Miradores ordenados de mayor a menor valoración media",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Mirador"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/miradores/ordenar/cercano": {
+            "post": {
+                "tags": [
+                    "Miradores"
+                ],
+                "summary": "Listar miradores ordenados por distancia desde una coordenada",
+                "operationId": "getMiradoresOrdenadosPorCercano",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "latitud",
+                                    "longitud"
+                                ],
+                                "properties": {
+                                    "latitud": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 41.3851
+                                    },
+                                    "longitud": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 2.1734
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Miradores ordenados de más cercano a más lejano",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Mirador"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    }
+                }
+            }
+        },
+        "/api/miradores/ordenar/nombre": {
+            "get": {
+                "tags": [
+                    "Miradores"
+                ],
+                "summary": "Listar miradores ordenados alfabéticamente por nombre",
+                "operationId": "getMiradoresOrdenadosPorNombre",
+                "responses": {
+                    "200": {
+                        "description": "Miradores ordenados por nombre",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Mirador"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/miradores/ordenar/dificultad": {
+            "get": {
+                "tags": [
+                    "Miradores"
+                ],
+                "summary": "Listar miradores ordenados por dificultad de sus rutas",
+                "operationId": "getMiradoresOrdenadosPorDificultad",
+                "responses": {
+                    "200": {
+                        "description": "Miradores ordenados de menor a mayor dificultad",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Mirador"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/miradores/{id}": {
+            "get": {
+                "tags": [
+                    "Miradores"
+                ],
+                "summary": "Obtener un mirador por ID",
+                "operationId": "showMirador",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Datos del mirador con provincia, rutas y fotos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "mirador": {
+                                            "$ref": "#/components/schemas/Mirador"
+                                        },
+                                        "provincia": {
+                                            "$ref": "#/components/schemas/Provincia"
+                                        },
+                                        "rutas": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Ruta"
+                                            }
+                                        },
+                                        "fotos": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Mirador no encontrado"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Miradores"
+                ],
+                "summary": "Actualizar un mirador existente",
+                "operationId": "updateMirador",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string",
+                                        "maxLength": 150,
+                                        "example": "Mirador del Tibidabo"
+                                    },
+                                    "descripcion": {
+                                        "type": "string",
+                                        "example": "Descripción actualizada",
+                                        "nullable": true
+                                    },
+                                    "latitud": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 41.4236
+                                    },
+                                    "longitud": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 2.1197
+                                    },
+                                    "provincia_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Mirador actualizado correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "mirador": {
+                                            "$ref": "#/components/schemas/Mirador"
+                                        },
+                                        "provincia": {
+                                            "$ref": "#/components/schemas/Provincia"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Mirador no encontrado"
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Miradores"
+                ],
+                "summary": "Eliminar un mirador",
+                "operationId": "destroyMirador",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Mirador eliminado correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Mirador eliminado correctamente"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Mirador no encontrado"
+                    }
+                }
+            }
+        },
+        "/api/provincias": {
+            "get": {
+                "tags": [
+                    "Provincias"
+                ],
+                "summary": "Listar todas las provincias",
+                "operationId": "getProvincias",
+                "responses": {
+                    "200": {
+                        "description": "Lista de provincias ordenadas por nombre",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Provincia"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Provincias"
+                ],
+                "summary": "Crear una nueva provincia",
+                "operationId": "storeProvincia",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nombre"
+                                ],
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string",
+                                        "maxLength": 100,
+                                        "example": "Barcelona"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Provincia creada correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Provincia"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    }
+                }
+            }
+        },
+        "/api/provincias/{id}": {
+            "get": {
+                "tags": [
+                    "Provincias"
+                ],
+                "summary": "Obtener una provincia por ID",
+                "operationId": "showProvincia",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Datos de la provincia",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Provincia"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Provincia no encontrada"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Provincias"
+                ],
+                "summary": "Actualizar una provincia existente",
+                "operationId": "updateProvincia",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nombre"
+                                ],
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string",
+                                        "maxLength": 100,
+                                        "example": "Girona"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Provincia actualizada correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Provincia"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Provincia no encontrada"
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Provincias"
+                ],
+                "summary": "Eliminar una provincia",
+                "operationId": "destroyProvincia",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Provincia eliminada correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Provincia eliminada correctamente"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Provincia no encontrada"
+                    }
+                }
+            }
+        },
+        "/api/rutas": {
+            "get": {
+                "tags": [
+                    "Rutas"
+                ],
+                "summary": "Listar todas las rutas",
+                "operationId": "getRutas",
+                "responses": {
+                    "200": {
+                        "description": "Lista de rutas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Ruta"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Rutas"
+                ],
+                "summary": "Crear una nueva ruta",
+                "operationId": "storeRuta",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nombre",
+                                    "mirador_id"
+                                ],
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string",
+                                        "maxLength": 150,
+                                        "example": "Ruta del Pico Mayor"
+                                    },
+                                    "descripcion": {
+                                        "type": "string",
+                                        "example": "Ruta de montaña con vistas panorámicas",
+                                        "nullable": true
+                                    },
+                                    "distancia_km": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 12.5,
+                                        "nullable": true
+                                    },
+                                    "duracion_estimada_min": {
+                                        "type": "integer",
+                                        "example": 180,
+                                        "nullable": true
+                                    },
+                                    "dificultad": {
+                                        "type": "string",
+                                        "maxLength": 30,
+                                        "example": "Media",
+                                        "nullable": true
+                                    },
+                                    "enlace_maps": {
+                                        "type": "string",
+                                        "maxLength": 500,
+                                        "example": "https://maps.google.com/...",
+                                        "nullable": true
+                                    },
+                                    "gpx_url": {
+                                        "type": "string",
+                                        "maxLength": 500,
+                                        "example": "https://ejemplo.com/ruta.gpx",
+                                        "nullable": true
+                                    },
+                                    "mirador_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Ruta creada correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "ruta": {
+                                            "$ref": "#/components/schemas/Ruta"
+                                        },
+                                        "mirador": {
+                                            "$ref": "#/components/schemas/Mirador"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    }
+                }
+            }
+        },
+        "/api/rutas/{id}": {
+            "get": {
+                "tags": [
+                    "Rutas"
+                ],
+                "summary": "Obtener una ruta por ID",
+                "operationId": "showRuta",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Datos de la ruta",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "ruta": {
+                                            "$ref": "#/components/schemas/Ruta"
+                                        },
+                                        "mirador": {
+                                            "$ref": "#/components/schemas/Mirador"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ruta no encontrada"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Rutas"
+                ],
+                "summary": "Actualizar una ruta existente",
+                "operationId": "updateRuta",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nombre": {
+                                        "type": "string",
+                                        "maxLength": 150,
+                                        "example": "Ruta del Pico Mayor"
+                                    },
+                                    "descripcion": {
+                                        "type": "string",
+                                        "example": "Descripción actualizada",
+                                        "nullable": true
+                                    },
+                                    "distancia_km": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 15,
+                                        "nullable": true
+                                    },
+                                    "duracion_estimada_min": {
+                                        "type": "integer",
+                                        "example": 200,
+                                        "nullable": true
+                                    },
+                                    "dificultad": {
+                                        "type": "string",
+                                        "maxLength": 30,
+                                        "example": "Alta",
+                                        "nullable": true
+                                    },
+                                    "enlace_maps": {
+                                        "type": "string",
+                                        "maxLength": 500,
+                                        "example": "https://maps.google.com/...",
+                                        "nullable": true
+                                    },
+                                    "gpx_url": {
+                                        "type": "string",
+                                        "maxLength": 500,
+                                        "example": "https://ejemplo.com/ruta-nueva.gpx",
+                                        "nullable": true
+                                    },
+                                    "mirador_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Ruta actualizada correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "ruta": {
+                                            "$ref": "#/components/schemas/Ruta"
+                                        },
+                                        "mirador": {
+                                            "$ref": "#/components/schemas/Mirador"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ruta no encontrada"
+                    },
+                    "422": {
+                        "description": "Error de validación"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Rutas"
+                ],
+                "summary": "Eliminar una ruta",
+                "operationId": "destroyRuta",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Ruta eliminada correctamente",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Ruta eliminada correctamente"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ruta no encontrada"
+                    }
+                }
+            }
+        },
+        "/api/miradores/{mirador}/rutas": {
+            "get": {
+                "tags": [
+                    "Rutas"
+                ],
+                "summary": "Listar rutas de un mirador",
+                "operationId": "getRutasPorMirador",
+                "parameters": [
+                    {
+                        "name": "mirador",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "example": 1
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lista de rutas del mirador",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Ruta"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Mirador no encontrado"
+                    }
+                }
+            }
+        },
+        "/api/tags": {
+            "get": {
+                "tags": [
+                    "Tags"
+                ],
+                "summary": "Listar todos los tags",
+                "operationId": "getTags",
+                "responses": {
+                    "200": {
+                        "description": "Lista de tags ordenados por nombre",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Tag"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Foto": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "url": {
+                        "type": "string",
+                        "example": "https://ejemplo.com/foto.jpg"
+                    },
+                    "fecha_subida": {
+                        "type": "string",
+                        "format": "date",
+                        "example": "2024-06-15",
+                        "nullable": true
+                    },
+                    "mirador_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "Mirador": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "Mirador del Tibidabo"
+                    },
+                    "descripcion": {
+                        "type": "string",
+                        "example": "Vistas panorámicas de Barcelona",
+                        "nullable": true
+                    },
+                    "latitud": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 41.4236
+                    },
+                    "longitud": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 2.1197
+                    },
+                    "provincia_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "Provincia": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "Barcelona"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "Ruta": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "Ruta del Pico Mayor"
+                    },
+                    "descripcion": {
+                        "type": "string",
+                        "example": "Ruta de montaña con vistas panorámicas",
+                        "nullable": true
+                    },
+                    "distancia_km": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 12.5,
+                        "nullable": true
+                    },
+                    "duracion_estimada_min": {
+                        "type": "integer",
+                        "example": 180,
+                        "nullable": true
+                    },
+                    "dificultad": {
+                        "type": "string",
+                        "example": "Media",
+                        "nullable": true
+                    },
+                    "enlace_maps": {
+                        "type": "string",
+                        "example": "https://maps.google.com/...",
+                        "nullable": true
+                    },
+                    "gpx_url": {
+                        "type": "string",
+                        "example": "https://ejemplo.com/ruta.gpx",
+                        "nullable": true
+                    },
+                    "mirador_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "Tag": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "nombre": {
+                        "type": "string",
+                        "example": "Naturaleza"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    }
+}

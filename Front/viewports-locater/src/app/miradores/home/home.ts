@@ -118,7 +118,7 @@ export class Home implements OnInit {
       // 2. Filter by tags client-side (tags are embedded in the base response)
       if (tagIds.length > 0) {
         base = base.filter(m =>
-          tagIds.every(tagId => m.tags?.some(t => t.id === tagId) ?? false)
+          tagIds.every(tagId => (m.tags?.some(t => t.id === tagId) ?? false))
         );
       }
 
@@ -170,7 +170,8 @@ export class Home implements OnInit {
         const ordenada = await firstValueFrom(orden$).then(d => d ?? []);
         const baseIds = new Set(base.map(m => m.id));
         this.miradores.set(ordenada.filter(m => baseIds.has(m.id)));
-      } catch {
+      } catch (err) {
+        console.error(err);
         this.miradores.set(base);
       }
       this.cargando.set(false);

@@ -4,13 +4,14 @@ import { HttpClient } from '@angular/common/http';
 import { Provincia } from '../models/provincia.interface';
 import { Tag } from '../models/tag.interface';
 import { MiradorDetalle } from '../models/mirador_detalle.interface';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class MiradorService {
   public miradores = signal<Mirador[]>([]);
-  apiUrl = 'http://127.0.0.1:8000/api';
+  apiUrl = environment.apiUrl;
   private http = inject(HttpClient);
 
 

@@ -137,7 +137,12 @@
               @for (r of rutas; track r.id) {
                 <div class="route-item">
                   <div class="route-header">
-                    <span class="route-name">{{ r.nombre }}</span>
+                    <div class="route-header-left">
+                      <span class="route-name">{{ r.nombre }}</span>
+                      @if (r.tipo) {
+                        <span class="chip chip-tipo">{{ r.tipo }}</span>
+                      }
+                    </div>
                     @if (r.dificultad) {
                       <span class="chip chip-dificultad">{{ r.dificultad }}</span>
                     }
@@ -154,18 +159,124 @@
                     @if (r.duracion_estimada_min != null) {
                       <span class="meta-item">⏱️ {{ formatDuracion(r.duracion_estimada_min) }}</span>
                     }
+                    @if (r.elevacion_ganada != null) {
+                      <span class="meta-item">⛰️ +{{ r.elevacion_ganada }} m</span>
+                    }
                   </div>
 
-                  @if (r.enlace_maps) {
-                    <a class="btn-route" [href]="r.enlace_maps" target="_blank" rel="noopener noreferrer">
-                      🗺️ Ver en Maps
-                    </a>
-                  }
+                  <div class="route-actions">
+                    @if (r.enlace_maps) {
+                      <a class="btn-route btn-route-map" [href]="r.enlace_maps" target="_blank" rel="noopener noreferrer">
+                        🗺️ Ver mapa
+                      </a>
+                    }
+                    @if (r.gpx_url) {
+                      <a class="btn-route btn-route-gpx" [href]="r.gpx_url" target="_blank" rel="noopener noreferrer" download>
+                        ⬇️ Descargar GPX
+                      </a>
+                    }
+                  </div>
                 </div>
               }
             </div>
           </div>
         }
+
+        <!-- Reviews section -->
+        <div class="card reviews-card">
+          <div class="reviews-header">
+            <h2 class="card-title">
+              Valoraciones
+              @if (valoraciones().length > 0) {
+                <span class="badge-count">{{ valoraciones().length }}</span>
+              }
+            </h2>
+            @if (!mostrarFormularioValoracion()) {
+              <button class="btn-add-review" (click)="abrirFormularioValoracion()">
+                ✏️ Añadir valoración
+              </button>
+            }
+          </div>
+
+          <!-- Rating form -->
+          @if (mostrarFormularioValoracion()) {
+            <div class="review-form-container">
+              <h3 class="form-title">Tu valoración</h3>
+
+              <div class="star-selector" (mouseleave)="salirHoverEstrellas()">
+                @for (n of [1, 2, 3, 4, 5]; track n) {
+                  <button
+                    type="button"
+                    class="star-btn"
+                    [class.active]="n <= (starsHover() || starsSeleccionadas())"
+                    (mouseenter)="hoverEstrella(n)"
+                    (click)="seleccionarEstrella(n)"
+                    [attr.aria-label]="n + ' estrellas'">★</button>
+                }
+              </div>
+
+              <div class="form-field">
+                <label class="form-label">Nombre</label>
+                <input
+                  class="form-input"
+                  type="text"
+                  placeholder="Tu nombre"
+                  [(ngModel)]="nuevaValoracion.usuario"
+                  name="usuario"
+                  maxlength="80" />
+              </div>
+
+              <div class="form-field">
+                <label class="form-label">Comentario (opcional)</label>
+                <textarea
+                  class="form-textarea"
+                  rows="3"
+                  placeholder="Cuéntanos tu experiencia..."
+                  [(ngModel)]="nuevaValoracion.comentario"
+                  name="comentario"
+                  maxlength="500"></textarea>
+              </div>
+
+              <div class="form-footer">
+                @if (errorValoracion()) {
+                  <p class="form-error">⚠️ {{ errorValoracion() }}</p>
+                }
+                <button class="btn-cancel" type="button" (click)="cerrarFormularioValoracion()">Cancelar</button>
+                <button
+                  class="btn-submit"
+                  type="button"
+                  (click)="enviarValoracion()"
+                  [disabled]="cargandoValoracion()">
+                  @if (cargandoValoracion()) {
+                    <span class="btn-spinner"></span> Enviando...
+                  } @else {
+                    ✅ Enviar
+                  }
+                </button>
+              </div>
+            </div>
+          }
+
+          <!-- Reviews list -->
+          @if (valoraciones().length > 0) {
+            <div class="reviews-list">
+              @for (v of valoraciones(); track v.id) {
+                <div class="review-item">
+                  <div class="review-meta">
+                    <span class="review-user">{{ v.usuario }}</span>
+                    <span class="review-stars">{{ generarEstrellas(v.puntuacion) }}</span>
+                    <span class="review-date">{{ v.created_at | date:'dd/MM/yyyy' }}</span>
+                  </div>
+                  @if (v.comentario) {
+                    <p class="review-comment">{{ v.comentario }}</p>
+                  }
+                </div>
+              }
+            </div>
+          } @else if (!cargando()) {
+            <p class="no-reviews">Sin valoraciones aún. ¡Sé el primero en opinar!</p>
+          }
+        </div>
 
       </div>
       <!-- end col-main -->
@@ -175,13 +286,26 @@
 
         <!-- Rating card -->
         <div class="card rating-card">
-          <h3 class="card-title">Valoración</h3>
-          <div class="stars">
-            @for (s of [1,2,3,4,5]; track s) {
-              <span class="star">★</span>
-            }
-          </div>
-          <p class="rating-text">Sin valoraciones aún</p>
+          <h3 class="card-title">Valoración media</h3>
+          @if (promedioValoracion !== null) {
+            <div class="rating-average">
+              <span class="rating-score">{{ promedioValoracion }}</span>
+              <span class="rating-max">/ 5</span>
+            </div>
+            <div class="stars stars-display">
+              @for (s of [1,2,3,4,5]; track s) {
+                <span class="star" [class.star-filled]="s <= promedioValoracion!">★</span>
+              }
+            </div>
+            <p class="rating-text">{{ valoraciones().length }} valoración{{ valoraciones().length !== 1 ? 'es' : '' }}</p>
+          } @else {
+            <div class="stars stars-display">
+              @for (s of [1,2,3,4,5]; track s) {
+                <span class="star">★</span>
+              }
+            </div>
+            <p class="rating-text">Sin valoraciones aún</p>
+          }
         </div>
 
         <!-- Action buttons card -->

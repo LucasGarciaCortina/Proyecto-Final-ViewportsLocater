@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Provincia } from '../models/provincia.interface';
 import { Tag } from '../models/tag.interface';
 import { MiradorDetalle } from '../models/mirador_detalle.interface';
+import { Valoracion } from '../models/valoracion.interface';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -86,6 +87,14 @@ export class MiradorService {
     provincia_id: number,
   }) {
     return this.http.post<Mirador>(`${this.apiUrl}/miradores`, data);
+  }
+
+  getValoraciones(miradorId: number) {
+    return this.http.get<Valoracion[]>(`${this.apiUrl}/miradores/${miradorId}/valoraciones`);
+  }
+
+  crearValoracion(miradorId: number, data: { usuario: string; puntuacion: number; comentario: string | null }) {
+    return this.http.post<Valoracion>(`${this.apiUrl}/miradores/${miradorId}/valoraciones`, data);
   }
 
 }

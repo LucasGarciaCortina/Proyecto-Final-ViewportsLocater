@@ -8,4 +8,6 @@ export interface Ruta {
   enlace_maps: string | null;
   gpx_url: string | null;
   mirador_id: number;
+  elevacion_ganada: number | null;
+  tipo: string | null;
 }

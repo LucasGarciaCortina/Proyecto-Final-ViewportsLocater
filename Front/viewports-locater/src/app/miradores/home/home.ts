@@ -110,17 +110,15 @@ export class Home implements OnInit {
     const texto = this.q.trim();
     const tagIds = this.selectedTagIds();
 
-    // Base: dificultad (rutas) > provincia > texto > todos
+    // Base: tags > dificultad > provincia > todos
     const base$ =
-  tagIds.length > 0
-    ? this.miradorService.miradoresPorTags(tagIds)
-    : this.dificultad !== ''
-      ? this.miradorService.miradoresPorDificultad(this.dificultad)
-      : this.provinciaId !== ''
-        ? this.miradorService.miradoresPorProvincia(this.provinciaId)
-        : texto.length > 0
-          ? this.miradorService.buscarPorNombre(texto)
-          : this.miradorService.cargarMiradores();
+      tagIds.length > 0
+        ? this.miradorService.miradoresPorTags(tagIds)
+        : this.dificultad !== ''
+          ? this.miradorService.miradoresPorDificultad(this.dificultad)
+          : this.provinciaId !== ''
+            ? this.miradorService.miradoresPorProvincia(this.provinciaId)
+            : this.miradorService.cargarMiradores();
 
     const cargarBase = (): Promise<Mirador[]> =>
       new Promise((resolve, reject) => {
@@ -131,7 +129,17 @@ export class Home implements OnInit {
       });
 
     try {
-      const base = await cargarBase();
+      let base = await cargarBase();
+
+      // Apply text filter on top of any base dataset
+      if (texto.length > 0) {
+        const textoBusqueda = texto.toLowerCase();
+        base = base.filter(
+          (m) =>
+            m.nombre.toLowerCase().includes(textoBusqueda) ||
+            m.descripcion.toLowerCase().includes(textoBusqueda)
+        );
+      }
 
       // Orden "cercanos" requiere ubicación + endpoint
       if (this.orden === 'cercanos') {

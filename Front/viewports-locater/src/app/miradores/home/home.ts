@@ -154,12 +154,12 @@ export class Home implements OnInit {
         const pos = await this.getPosicion();
 
         const radioData = await firstValueFrom(this.miradorService.filtrarPorRadio(pos.lat, pos.lng, this.radioKm)).then(d => d ?? []);
-        const radioIds = new Set(radioData.map(m => m.id));
+        const radioIds = new Set(radioData.filter(m => m?.id != null).map(m => m.id));
         base = base.filter(m => radioIds.has(m.id));
 
         const ordenada = await firstValueFrom(this.miradorService.ordenarPorCercania(pos.lat, pos.lng)).then(d => d ?? []);
-        const baseIds = new Set(base.map(m => m.id));
-        this.miradores.set(ordenada.filter(m => baseIds.has(m.id)));
+        const baseIds = new Set(base.filter(m => m?.id != null).map(m => m.id));
+        this.miradores.set(ordenada.filter(m => m?.id != null && baseIds.has(m.id)));
         this.cargando.set(false);
         return;
       }
@@ -174,8 +174,8 @@ export class Home implements OnInit {
 
       try {
         const ordenada = await firstValueFrom(orden$).then(d => d ?? []);
-        const baseIds = new Set(base.map(m => m.id));
-        this.miradores.set(ordenada.filter(m => baseIds.has(m.id)));
+        const baseIds = new Set(base.filter(m => m?.id != null).map(m => m.id));
+        this.miradores.set(ordenada.filter(m => m?.id != null && baseIds.has(m.id)));
       } catch (err) {
         console.error(err);
         this.miradores.set(base);

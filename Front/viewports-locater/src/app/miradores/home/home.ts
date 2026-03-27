@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 
 import { MiradorService } from '../../services/mirador-service';
 import { Provincia } from '../../models/provincia.interface';
@@ -110,68 +111,54 @@ export class Home implements OnInit {
     const texto = this.q.trim();
     const tagIds = this.selectedTagIds();
 
-    // Base: tags > dificultad > provincia > todos
-    const base$ =
-      tagIds.length > 0
-        ? this.miradorService.miradoresPorTags(tagIds)
-        : this.dificultad !== ''
-          ? this.miradorService.miradoresPorDificultad(this.dificultad)
-          : this.provinciaId !== ''
-            ? this.miradorService.miradoresPorProvincia(this.provinciaId)
-            : this.miradorService.cargarMiradores();
-
-    const cargarBase = (): Promise<Mirador[]> =>
-      new Promise((resolve, reject) => {
-        base$.subscribe({
-          next: (d) => resolve(d ?? []),
-          error: (e) => reject(e),
-        });
-      });
-
     try {
-      let base = await cargarBase();
+      // 1. Load all miradores as the base dataset
+      let base = await firstValueFrom(this.miradorService.cargarMiradores()).then(d => d ?? []);
 
-      // Apply text filter on top of any base dataset
-      if (texto.length > 0) {
-        const textoBusqueda = texto.toLowerCase();
-        base = base.filter(
-          (m) =>
-            m.nombre.toLowerCase().includes(textoBusqueda) ||
-            m.descripcion.toLowerCase().includes(textoBusqueda)
+      // 2. Filter by tags client-side (tags are embedded in the base response)
+      if (tagIds.length > 0) {
+        base = base.filter(m =>
+          tagIds.every(tagId => m.tags?.some(t => t.id === tagId) ?? false)
         );
       }
 
-      // Apply radio distance filter when ordering by nearest
+      // 3. Filter by provincia client-side (provincia is embedded in the base response)
+      if (this.provinciaId !== '') {
+        base = base.filter(m => m.provincia.id === this.provinciaId);
+      }
+
+      // 4. Filter by dificultad (backend-assisted: dificultad lives on rutas, not miradores)
+      if (this.dificultad !== '') {
+        const difMiradores = await firstValueFrom(this.miradorService.miradoresPorDificultad(this.dificultad)).then(d => d ?? []);
+        const difIds = new Set(difMiradores.map(m => m.id));
+        base = base.filter(m => difIds.has(m.id));
+      }
+
+      // 5. Filter by text client-side
+      if (texto.length > 0) {
+        const textoBusqueda = texto.toLowerCase();
+        base = base.filter(m =>
+          m.nombre.toLowerCase().includes(textoBusqueda) ||
+          m.descripcion.toLowerCase().includes(textoBusqueda)
+        );
+      }
+
+      // 6. Apply radius filter and proximity ordering when ordering by nearest
       if (this.orden === 'cercanos') {
         const pos = await this.getPosicion();
 
-        const radioData = await new Promise<Mirador[]>((resolve, reject) => {
-          this.miradorService.filtrarPorRadio(pos.lat, pos.lng, this.radioKm).subscribe({
-            next: (d) => resolve(d ?? []),
-            error: (e) => reject(e),
-          });
-        });
+        const radioData = await firstValueFrom(this.miradorService.filtrarPorRadio(pos.lat, pos.lng, this.radioKm)).then(d => d ?? []);
+        const radioIds = new Set(radioData.map(m => m.id));
+        base = base.filter(m => radioIds.has(m.id));
 
-        const radioIds = new Set(radioData.map((m) => m.id));
-        base = base.filter((m) => radioIds.has(m.id));
-
-        // base is already filtered by radio distance; intersect with proximity ordering
-        this.miradorService.ordenarPorCercania(pos.lat, pos.lng).subscribe({
-          next: (ordenada) => {
-            const baseIds = new Set(base.map((m) => m.id));
-            const final = (ordenada ?? []).filter((m) => baseIds.has(m.id));
-            this.miradores.set(final);
-            this.cargando.set(false);
-          },
-          error: (err) => {
-            console.error(err);
-            this.error.set('No se pudo ordenar por cercanía.');
-            this.cargando.set(false);
-          },
-        });
+        const ordenada = await firstValueFrom(this.miradorService.ordenarPorCercania(pos.lat, pos.lng)).then(d => d ?? []);
+        const baseIds = new Set(base.map(m => m.id));
+        this.miradores.set(ordenada.filter(m => baseIds.has(m.id)));
+        this.cargando.set(false);
         return;
       }
 
+      // 7. Apply ordering on the filtered result
       const orden$ =
         this.orden === 'valoracion'
           ? this.miradorService.ordenarPorValoracion()
@@ -179,19 +166,14 @@ export class Home implements OnInit {
             ? this.miradorService.ordenarPorDificultad()
             : this.miradorService.ordenarPorNombre();
 
-      orden$.subscribe({
-        next: (ordenada) => {
-          const baseIds = new Set(base.map((m) => m.id));
-          const final = (ordenada ?? []).filter((m) => baseIds.has(m.id));
-          this.miradores.set(final);
-          this.cargando.set(false);
-        },
-        error: (err) => {
-          console.error(err);
-          this.miradores.set(base);
-          this.cargando.set(false);
-        },
-      });
+      try {
+        const ordenada = await firstValueFrom(orden$).then(d => d ?? []);
+        const baseIds = new Set(base.map(m => m.id));
+        this.miradores.set(ordenada.filter(m => baseIds.has(m.id)));
+      } catch {
+        this.miradores.set(base);
+      }
+      this.cargando.set(false);
     } catch (err) {
       console.error(err);
       this.error.set('Error aplicando filtros.');

@@ -1,23 +1,236 @@
 <div class="page">
-  <!-- Cargando -->
+
+  <!-- Loading state -->
   @if (cargando()) {
-    <div class="state">Cargando mirador...</div>
+    <div class="state-center">
+      <div class="spinner"></div>
+      <p>Cargando mirador...</p>
+    </div>
   }
 
-  <!-- Error -->
+  <!-- Error state -->
   @if (error()) {
-    <div class="state error">{{ error() }}</div>
+    <div class="state-center state-error">
+      <span class="state-icon">⚠️</span>
+      <p>{{ error() }}</p>
+      <button class="btn-back" (click)="volver()">← Volver al listado</button>
+    </div>
   }
 
-  <!-- Datos -->
+  <!-- Content -->
   @if (detalle(); as d) {
-    <button (click)="volver()">← Volver al listado</button>
 
-    <h1>{{ d.mirador.nombre }}</h1>
-    <p>{{ d.provincia.nombre }}</p>
-    <p>{{ d.mirador.descripcion }}</p>
+    <!-- Page header -->
+    <div class="page-header">
+      <button class="btn-back" (click)="volver()">← Volver al listado</button>
+    </div>
 
-    <p>Rutas: {{ d.rutas.length }}</p>
-    <p>Fotos: {{ d.fotos.length }}</p>
+    <!-- Two-column grid -->
+    <div class="content-grid">
+
+      <!-- ===== LEFT / MAIN COLUMN ===== -->
+      <div class="col-main">
+
+        <!-- Gallery card -->
+        <div class="card gallery-card">
+          @if (fotos.length > 0) {
+            <div class="gallery">
+              <img class="gallery-img" [src]="fotoPrincipalUrl" [alt]="d.mirador.nombre" />
+
+              @if (fotos.length > 1) {
+                <button class="gallery-btn gallery-prev" (click)="fotoAnterior()" aria-label="Foto anterior">&#8249;</button>
+                <button class="gallery-btn gallery-next" (click)="fotoSiguiente()" aria-label="Foto siguiente">&#8250;</button>
+
+                <div class="gallery-indicators">
+                  @for (f of fotos; track f.id; let i = $index) {
+                    <button
+                      class="indicator"
+                      [class.active]="i === fotoActual()"
+                      (click)="irAFoto(i)"
+                      [attr.aria-label]="'Foto ' + (i + 1)">
+                    </button>
+                  }
+                </div>
+
+                <div class="gallery-counter">{{ fotoActual() + 1 }} / {{ fotos.length }}</div>
+              }
+            </div>
+          } @else {
+            <div class="gallery-placeholder">
+              <span class="gallery-icon">🏔️</span>
+              <p>Sin fotos disponibles</p>
+            </div>
+          }
+        </div>
+
+        <!-- Basic info card -->
+        <div class="card info-card">
+          <div class="info-header">
+            <h1 class="mirador-title">{{ d.mirador.nombre }}</h1>
+            <span class="province-badge">
+              <span class="pin-icon">📍</span>{{ d.provincia.nombre }}
+            </span>
+          </div>
+
+          @if (tags.length > 0) {
+            <div class="tags-row">
+              @for (tag of tags; track tag) {
+                <span class="chip chip-tag">{{ tag }}</span>
+              }
+            </div>
+          }
+
+          <p class="mirador-desc">{{ d.mirador.descripcion }}</p>
+        </div>
+
+        <!-- Details card -->
+        <div class="card details-card">
+          <h2 class="card-title">Detalles</h2>
+          <div class="details-grid">
+            <div class="detail-item">
+              <span class="detail-icon">📏</span>
+              <div>
+                <div class="detail-label">Distancia</div>
+                <div class="detail-value">
+                  {{ rutaPrincipal?.distancia_km != null ? (rutaPrincipal!.distancia_km + ' km') : '—' }}
+                </div>
+              </div>
+            </div>
+
+            <div class="detail-item">
+              <span class="detail-icon">⏱️</span>
+              <div>
+                <div class="detail-label">Tiempo estimado</div>
+                <div class="detail-value">{{ formatDuracion(rutaPrincipal?.duracion_estimada_min ?? null) }}</div>
+              </div>
+            </div>
+
+            <div class="detail-item">
+              <span class="detail-icon">⚠️</span>
+              <div>
+                <div class="detail-label">Dificultad</div>
+                <div class="detail-value">{{ rutaPrincipal?.dificultad ?? '—' }}</div>
+              </div>
+            </div>
+
+            <div class="detail-item">
+              <span class="detail-icon">🧭</span>
+              <div>
+                <div class="detail-label">Coordenadas</div>
+                <div class="detail-value coords">
+                  {{ d.mirador.latitud | number:'1.4-4' }}, {{ d.mirador.longitud | number:'1.4-4' }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Routes section -->
+        @if (rutas.length > 0) {
+          <div class="card routes-card">
+            <h2 class="card-title">
+              Rutas disponibles
+              <span class="badge-count">{{ rutas.length }}</span>
+            </h2>
+
+            <div class="routes-list">
+              @for (r of rutas; track r.id) {
+                <div class="route-item">
+                  <div class="route-header">
+                    <span class="route-name">{{ r.nombre }}</span>
+                    @if (r.dificultad) {
+                      <span class="chip chip-dificultad">{{ r.dificultad }}</span>
+                    }
+                  </div>
+
+                  @if (r.descripcion) {
+                    <p class="route-desc">{{ r.descripcion }}</p>
+                  }
+
+                  <div class="route-meta">
+                    @if (r.distancia_km != null) {
+                      <span class="meta-item">📏 {{ r.distancia_km }} km</span>
+                    }
+                    @if (r.duracion_estimada_min != null) {
+                      <span class="meta-item">⏱️ {{ formatDuracion(r.duracion_estimada_min) }}</span>
+                    }
+                  </div>
+
+                  @if (r.enlace_maps) {
+                    <a class="btn-route" [href]="r.enlace_maps" target="_blank" rel="noopener noreferrer">
+                      🗺️ Ver en Maps
+                    </a>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+      </div>
+      <!-- end col-main -->
+
+      <!-- ===== RIGHT / SIDEBAR COLUMN ===== -->
+      <div class="col-sidebar">
+
+        <!-- Rating card -->
+        <div class="card rating-card">
+          <h3 class="card-title">Valoración</h3>
+          <div class="stars">
+            @for (s of [1,2,3,4,5]; track s) {
+              <span class="star">★</span>
+            }
+          </div>
+          <p class="rating-text">Sin valoraciones aún</p>
+        </div>
+
+        <!-- Action buttons card -->
+        <div class="card actions-card">
+          <h3 class="card-title">Acciones</h3>
+          <div class="actions-list">
+            <button class="action-btn" (click)="compartir()">
+              <span class="action-icon">📤</span> Compartir
+            </button>
+            @if (rutaPrincipal?.enlace_maps) {
+              <a class="action-btn" [href]="rutaPrincipal!.enlace_maps" target="_blank" rel="noopener noreferrer">
+                <span class="action-icon">🗺️</span> Ver rutas
+              </a>
+            }
+          </div>
+        </div>
+
+        <!-- Weather / climate placeholder -->
+        <div class="card weather-card">
+          <h3 class="card-title">Clima</h3>
+          <div class="weather-placeholder">
+            <span class="weather-icon">⛅</span>
+            <p>Información meteorológica próximamente</p>
+          </div>
+        </div>
+
+        <!-- Map / location placeholder -->
+        <div class="card map-card">
+          <h3 class="card-title">Ubicación</h3>
+          <div class="map-placeholder">
+            <span class="map-icon">🗺️</span>
+            <p class="map-coords">
+              {{ d.mirador.latitud | number:'1.4-4' }},<br />{{ d.mirador.longitud | number:'1.4-4' }}
+            </p>
+          </div>
+        </div>
+
+      </div>
+      <!-- end col-sidebar -->
+
+    </div>
+    <!-- end content-grid -->
+
+    <!-- Floating Action Button -->
+    <button class="fab" (click)="compartir()" title="Compartir mirador">
+      <span>📤</span>
+    </button>
+
   }
+  <!-- end @if detalle -->
+
 </div>

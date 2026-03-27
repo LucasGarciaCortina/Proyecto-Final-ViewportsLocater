@@ -113,7 +113,7 @@ export class Home implements OnInit {
 
     try {
       // 1. Load all miradores as the base dataset
-      let base = await firstValueFrom(this.miradorService.cargarMiradores()).then(d => d ?? []);
+      let base = await firstValueFrom(this.miradorService.cargarMiradores()).then(d => (d ?? []).filter(m => m?.id != null));
 
       // 2. Filter by tags client-side (tags are embedded in the base response)
       if (tagIds.length > 0) {
@@ -124,12 +124,12 @@ export class Home implements OnInit {
 
       // 3. Filter by provincia client-side (provincia is embedded in the base response)
       if (this.provinciaId !== '') {
-        base = base.filter(m => m.provincia.id === this.provinciaId);
+        base = base.filter(m => m.provincia?.id === this.provinciaId);
       }
 
       // 4. Filter by dificultad (backend-assisted: dificultad lives on rutas, not miradores)
       if (this.dificultad !== '') {
-        const difMiradores = await firstValueFrom(this.miradorService.miradoresPorDificultad(this.dificultad)).then(d => d ?? []);
+        const difMiradores = await firstValueFrom(this.miradorService.miradoresPorDificultad(this.dificultad)).then(d => (d ?? []).filter(m => m?.id != null));
         const difIds = new Set(difMiradores.map(m => m.id));
         base = base.filter(m => difIds.has(m.id));
       }

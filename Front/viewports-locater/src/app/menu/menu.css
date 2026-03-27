@@ -1,0 +1,46 @@
+.navbar {
+  background: linear-gradient(90deg, #1f5cff, #0f4bff);
+  padding: 14px 24px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  color: white;
+  font-weight: 900;
+  font-size: 18px;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+}
+
+.nav-links {
+  display: flex;
+  gap: 14px;
+}
+
+.nav-links a {
+  color: white;
+  text-decoration: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 600;
+  opacity: 0.9;
+  transition: 0.2s;
+}
+
+.nav-links a:hover {
+  background: rgba(255, 255, 255, 0.15);
+  opacity: 1;
+}
+
+.nav-links a.active {
+  background: rgba(0, 0, 0, 0.18);
+  opacity: 1;
+}

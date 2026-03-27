@@ -1,0 +1,125 @@
+<div class="page">
+  <div class="header">
+    <h1>Explorar Miradores</h1>
+    <p>Descubre los mejores miradores cerca de ti</p>
+  </div>
+
+  <!-- Buscador -->
+  <div class="search">
+    <input type="text" [(ngModel)]="q" placeholder="Buscar miradores por nombre o descripción..." />
+    <button class="btn" (click)="aplicarFiltros()">Buscar</button>
+  </div>
+
+  <button class="btn btn-light" (click)="toggleFiltros()">
+    {{ filtrosVisibles ? 'Ocultar filtros' : 'Mostrar filtros' }}
+  </button>
+
+  <!-- Filtros -->
+  @if (filtrosVisibles) {
+  <div class="filters">
+    <h3>Filtros de búsqueda</h3>
+
+    <div class="grid">
+      <div>
+        <label>Zona / Provincia</label>
+        <select [(ngModel)]="provinciaId">
+          <option value="">Todas las zonas</option>
+          @for (p of provincias(); track p.id) {
+          <option [ngValue]="p.id">{{ p.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      <div>
+        <label>Dificultad</label>
+        <select [(ngModel)]="dificultad">
+          <option value="">Todas</option>
+          <option value="facil">Fácil</option>
+          <option value="media">Media</option>
+          <option value="dificil">Difícil</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Ordenar por</label>
+        <select [(ngModel)]="orden">
+          <option value="valoracion">Mejor valoración</option>
+          <option value="cercanos">Más cercanos</option>
+          <option value="nombre">Nombre A-Z</option>
+          <option value="dificultad">Dificultad</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Distancia máxima: {{ radioKm }} km</label>
+        <input type="range" min="1" max="200" [(ngModel)]="radioKm" />
+        <button class="btn btn-outline" (click)="aplicarRadio()">Aplicar radio</button>
+      </div>
+    </div>
+
+    <!-- Botón abrir subpanel tags -->
+      <div class="tags-toggle">
+        <button class="btn btn-light" (click)="toggleFiltrosTags()">
+          {{ filtrosTagVisibles ? 'Ocultar características' : 'Filtrar por características' }}
+        </button>
+      </div>
+
+      <!-- Subpanel tags -->
+      @if (filtrosTagVisibles) {
+        <div class="tags-panel">
+          <h4>Filtrar por características</h4>
+
+          <div class="tags-grid">
+            @for (t of tagsDisponibles(); track t.id) {
+              <label class="tag-item">
+                <input
+                  type="checkbox"
+                  [checked]="isTagSelected(t.id)"
+                  (change)="toggleTag(t.id)"
+                />
+                <span>{{ t.nombre }}</span>
+              </label>
+            }
+          </div>
+
+          <div class="tag-info">
+            Los miradores mostrados tendrán <strong>todas</strong> las características seleccionadas.
+          </div>
+
+          <div class="tags-actions">
+            <button class="btn btn-outline" (click)="clearTags()">Limpiar</button>
+            <button class="btn btn-primary" (click)="aplicarFiltros()">Aplicar características</button>
+          </div>
+        </div>
+      }
+
+    <div class="filters-actions">
+      <button class="btn btn-primary" (click)="aplicarFiltros()">Aplicar filtros</button>
+    </div>
+  </div>
+  }
+
+  <!-- Estado -->
+  @if (cargando()) {
+  <div class="state">Cargando...</div>
+  }
+
+  @if (error()) {
+  <div class="state error">{{ error() }}</div>
+  }
+
+  <!-- Lista -->
+  <div class="list-header">
+    Mostrando {{ miradores().length }} miradores
+  </div>
+
+  @if (miradores().length === 0 && !cargando()) {
+  <div class="state">No hay miradores para mostrar.</div>
+  } @else {
+  <div class="cards">
+  @for (m of miradores(); track m.id) {
+    <app-item-mirador [mirador]="m"></app-item-mirador>
+  }
+</div>
+  }
+</div>

@@ -1,0 +1,23 @@
+<div class="page">
+  <!-- Cargando -->
+  @if (cargando()) {
+    <div class="state">Cargando mirador...</div>
+  }
+
+  <!-- Error -->
+  @if (error()) {
+    <div class="state error">{{ error() }}</div>
+  }
+
+  <!-- Datos -->
+  @if (detalle(); as d) {
+    <button (click)="volver()">← Volver al listado</button>
+
+    <h1>{{ d.mirador.nombre }}</h1>
+    <p>{{ d.provincia.nombre }}</p>
+    <p>{{ d.mirador.descripcion }}</p>
+
+    <p>Rutas: {{ d.rutas.length }}</p>
+    <p>Fotos: {{ d.fotos.length }}</p>
+  }
+</div>

@@ -1,0 +1,78 @@
+<div class="page">
+  <div class="header">
+    <h1>Gestión de Tags</h1>
+    <p>Crea, edita y elimina los tags de la plataforma</p>
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-error">{{ error() }}</div>
+  }
+
+  <div class="actions">
+    <button class="btn btn-primary" (click)="abrirFormularioNuevo()">
+      Nuevo Tag
+    </button>
+  </div>
+
+  @if (cargando()) {
+    <div class="loading">Cargando tags...</div>
+  } @else if (tags().length === 0) {
+    <div class="empty">No hay tags. Crea uno nuevo para empezar.</div>
+  } @else {
+    <div class="tags-grid">
+      @for (tag of tags(); track tag.id) {
+        <div class="tag-card">
+          <div class="tag-nombre">{{ tag.nombre }}</div>
+          <div class="tag-actions">
+            <button class="btn-edit" (click)="abrirFormularioEditar(tag)">Editar</button>
+            <button class="btn-delete" (click)="eliminarTag(tag.id, tag.nombre)">Eliminar</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Modal Formulario -->
+  @if (mostrarFormulario()) {
+    <div class="modal-overlay" (click)="cerrarFormulario()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>{{ editandoId() ? 'Editar Tag' : 'Nuevo Tag' }}</h2>
+          <button class="btn-close" (click)="cerrarFormulario()">✕</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Nombre del tag</label>
+            <input
+              type="text"
+              [(ngModel)]="nombreTag"
+              placeholder="Ej: Accesible, Costa, Montaña..."
+              class="form-input"
+              (keyup.enter)="guardarTag()"
+            />
+            <small>Máximo 50 caracteres</small>
+          </div>
+
+          @if (error()) {
+            <div class="form-error">{{ error() }}</div>
+          }
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-outline" (click)="cerrarFormulario()">Cancelar</button>
+          <button
+            class="btn btn-primary"
+            (click)="guardarTag()"
+            [disabled]="cargandoGuardar()">
+            @if (cargandoGuardar()) {
+              Guardando...
+            } @else {
+              {{ editandoId() ? 'Actualizar' : 'Crear' }}
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

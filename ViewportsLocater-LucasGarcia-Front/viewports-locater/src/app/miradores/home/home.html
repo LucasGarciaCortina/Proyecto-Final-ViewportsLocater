@@ -1,0 +1,199 @@
+<div class="page">
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <h1>Explorar Miradores</h1>
+        <p>Descubre los mejores miradores cerca de ti</p>
+      </div>
+      <div class="header-actions">
+        <app-user-location-widget (posicionActualizada)="onPosicionActualizada($event)"></app-user-location-widget>
+        @if (auth.isLoggedIn()) {
+        <a routerLink="/crear-mirador" class="btn btn-primary btn-create">
+          + Crear Mirador
+        </a>
+        }
+      </div>
+    </div>
+
+    <!-- MAPA -->
+    <div class="mapa-container">
+      <app-mapa-miradores [miradores]="miradores()"></app-mapa-miradores>
+    </div>
+
+    @if (auth.isLoggedIn()) {
+    <!-- Buscador -->
+    <div class="search">
+      <input type="text" [(ngModel)]="q" (ngModelChange)="paginaActual.set(1)" placeholder="Buscar miradores por nombre o descripción..." />
+    </div>
+
+
+    <button class="btn btn-light" (click)="toggleFiltros()">
+      {{ filtrosVisibles() ? 'Ocultar filtros' : 'Mostrar filtros' }}
+    </button>
+
+    <!-- Filtros -->
+    @if (filtrosVisibles()) {
+    <div class="filters">
+      <h3>Filtros de búsqueda</h3>
+
+      <div class="grid">
+        <div>
+          <label>Zona / Provincia</label>
+          <select [(ngModel)]="provinciaId">
+            <option value="">Todas las zonas</option>
+            @for (p of provincias(); track p.id) {
+            <option [ngValue]="p.id">{{ p.nombre }}</option>
+            }
+          </select>
+        </div>
+
+        <div>
+          <label>Dificultad</label>
+          <select [(ngModel)]="dificultad">
+            <option value="">Todas</option>
+            <option value="facil">Fácil</option>
+            <option value="media">Media</option>
+            <option value="dificil">Difícil</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Ordenar por</label>
+          <select [ngModel]="orden()" (ngModelChange)="orden.set($event);">
+            <option value="nombre">Nombre A-Z</option>
+            <option value="nombre-desc">Nombre Z-A</option>
+            <option value="valoracion">Mejor valoración</option>
+            <option value="dificultad">Dificultad</option>
+            <option value="cercanos">Más cercanos</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Valoración mínima</label>
+          <div class="rating-filter">
+            <div class="stars">
+              @for (i of [1, 2, 3, 4, 5]; track i) {
+              <button class="star" [class.active]="i <= valoracionMinima()" (click)="setValoracionMinima(i)"
+                title="Mínimo {{ i }} estrellas">
+                ★
+              </button>
+              }
+            </div>
+            @if (valoracionMinima() > 0) {
+            <button class="btn-clear-rating" (click)="clearValoracion()">
+              Limpiar
+            </button>
+            }
+          </div>
+        </div>
+
+        <!-- Distancia máxima CON SLIDER Y INPUT -->
+        <div>
+          <label>Distancia máxima: {{ radioKm === 0 ? 'Sin límite' : radioKm + ' km' }}</label>
+          <div class="distancia-row">
+            <input type="range" min="0" max="500" [(ngModel)]="radioKm" />
+            <input type="number" [(ngModel)]="radioKm" min="0" max="999" />
+          </div>
+          @if (radioKm > 0) {
+            <button class="btn-clear-rating" (click)="radioKm = 0">Limpiar</button>
+          }
+        </div>
+
+        <!-- Botón abrir subpanel tags -->
+        <div class="tags-toggle">
+          <button class="btn btn-light" (click)="toggleFiltrosTags()">
+            {{ filtrosTagVisibles() ? 'Ocultar tags' : 'Filtrar por tags' }}
+          </button>
+        </div>
+
+        <!-- Subpanel tags -->
+        @if (filtrosTagVisibles()) {
+        <div class="tags-panel">
+          <h4>Filtrar por tags</h4>
+
+          <div class="tags-grid">
+            @for (t of tagsDisponibles(); track t.id) {
+            <label class="tag-item">
+              <input type="checkbox" [checked]="isTagSelected(t.id)" (change)="toggleTag(t.id)" />
+              <span>{{ t.nombre }}</span>
+            </label>
+            }
+          </div>
+
+          <div class="tag-info">
+            Los miradores mostrados tendrán <strong>todas</strong> las características seleccionadas.
+          </div>
+
+          <div class="tags-actions">
+            <button class="btn btn-outline" (click)="clearTags()">Limpiar</button>
+          </div>
+        </div>
+        }
+
+
+      </div>
+      <div class="filters-actions">
+        <button class="btn btn-primary" (click)="aplicarFiltros()">Aplicar filtros</button>
+      </div>
+    </div>
+    }
+    }@else {
+    <div class="state info">
+      <p>Estás viendo los 6 mejores miradores. <a routerLink="/login" class="link-login">Inicia sesión</a> para ver todos.
+    </div>
+    }
+
+    <!-- Estado -->
+    @if (cargando()) {
+    <div class="state">Cargando...</div>
+    }
+
+    @if (error()) {
+    <div class="state error">{{ error() }}</div>
+    }
+  </div>
+
+  <!-- Lista -->
+  <div class="list-header">
+    <p>Mostrando {{ resultadoInicial }}-{{ resultadoFinal }} de {{ miradoresFiltradosPorTexto.length }} resultados</p>
+  </div>
+
+  @if (miradoresFiltradosPorTexto.length === 0 && !cargando()) {
+  <div class="state">No hay miradores para mostrar.</div>
+  } @else {
+  <div class="cards">
+    @for (m of miradoresPaginados; track m.id) {
+    <app-item-mirador [mirador]="m" [distancia]="getDistancia(m.id)"></app-item-mirador>
+    }
+  </div>
+
+  @if (totalPaginas > 1) {
+  <div class="paginador">
+    <button class="btn-pag" [disabled]="paginaActual() === 1" (click)="irAPagina(1)">
+      « Primera
+    </button>
+    <button class="btn-pag" [disabled]="paginaActual() === 1" (click)="irAPagina(paginaActual() - 1)">
+      ← Anterior
+    </button>
+
+    @for (p of paginasVisibles; track p) {
+    @if (p === '...') {
+      <span class="btn-pag btn-pag-dots">…</span>
+    } @else {
+      <button class="btn-pag" [class.active]="p === paginaActual()" (click)="irAPagina(+p)">
+        {{ p }}
+      </button>
+    }
+    }
+
+    <button class="btn-pag" [disabled]="paginaActual() === totalPaginas" (click)="irAPagina(paginaActual() + 1)">
+      Siguiente →
+    </button>
+    <button class="btn-pag" [disabled]="paginaActual() === totalPaginas" (click)="irAPagina(totalPaginas)">
+      Última »
+    </button>
+  </div>
+  }
+  }
+
+</div>

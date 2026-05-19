@@ -1,0 +1,96 @@
+<div class="chatbot-container" [class.open]="showChatbot()">
+  <div class="chatbot-header">
+    <div class="header-content">
+      <span class="chatbot-icon">💬</span>
+      <h3>Asistente Virtual</h3>
+      <p class="subtitle">Siempre disponible</p>
+    </div>
+    <button class="close-btn" (click)="toggleChatbot()">✕</button>
+  </div>
+
+  @if (showChatbot()) {
+
+    @if (!auth.isLoggedIn()) {
+    <!-- Pantalla para usuarios no logueados -->
+    <div class="chat-login-required">
+      <span class="chat-login-icon">🔒</span>
+      <p class="chat-login-title">Acceso restringido</p>
+      <p class="chat-login-text">El asistente de miradores está disponible solo para usuarios registrados.</p>
+      <button class="chat-login-btn" (click)="goToLogin()">Iniciar sesión</button>
+      <button class="chat-register-btn" (click)="goToRegister()">Crear cuenta gratis</button>
+    </div>
+
+    } @else {
+  <div class="chat-messages">
+    @for (message of messages(); track message.id) {
+    <div [class.user-message]="message.type === 'user'" [class.bot-message]="message.type === 'bot'" class="message">
+      <div class="message-bubble">
+        <p class="message-text">{{ message.content }}</p>
+
+        @if (message.recommendations && message.recommendations.length > 0) {
+        <div class="recommendations">
+          @for (mirador of message.recommendations; track mirador.id) {
+          <div class="mirador-card" (click)="viewMiradorDetails(mirador)">
+            <div class="mirador-info">
+              <h4>{{ mirador.nombre }}</h4>
+              <p class="location">📍 {{ mirador.provincia }}</p>
+              @if (mirador.valoracion_media) {
+              <div class="rating">
+                <span class="stars">⭐ {{ mirador.valoracion_media }}</span>
+              </div>
+              }
+            </div>
+            <div class="mirador-action">
+              <button class="view-btn">Ver detalles →</button>
+            </div>
+          </div>
+          }
+        </div>
+        }
+
+        <span class="message-time">{{ message.timestamp | date:'HH:mm' }}</span>
+      </div>
+    </div>
+    }
+
+    @if (isLoading()) {
+    <div class="message bot-message">
+      <div class="message-bubble">
+        <div class="typing-indicator">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </div>
+    }
+  </div>
+  @if (messages().length <= 1) {
+  <div class="suggestions-area">
+    <p class="suggestions-label">Prueba con:</p>
+    <div class="suggested-queries">
+      @for (query of suggestedQueries(); track query) {
+      <button class="suggestion-btn" (click)="useSuggestedQuery(query)">
+        {{ query }}
+      </button>
+      }
+    </div>
+  </div>
+  }
+
+  <div class="chat-input-area">
+    <input type="text" class="chat-input" [(ngModel)]="userInput" (keyup.enter)="sendMessage()"
+      placeholder="Escribe tu pregunta..." [disabled]="isLoading()">
+    <button class="send-btn" (click)="sendMessage()" [disabled]="isLoading() || !userInput.trim()">
+      ➤
+    </button>
+  </div>
+  } <!-- fin @else logueado -->
+  }
+
+@if (!showChatbot()) {
+<button class="floating-btn" (click)="toggleChatbot()" title="Abrir asistente">
+  💬
+</button>
+}
+</div>

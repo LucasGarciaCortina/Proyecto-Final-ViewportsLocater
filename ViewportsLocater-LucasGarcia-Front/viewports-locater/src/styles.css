@@ -1,0 +1,36 @@
+@import 'leaflet/dist/leaflet.css';
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #f0f7f2;
+  color: #2c2c2a;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+/* ===== PALETA DE COLORES - VIEWPORTS LOCATER ===== */
+
+:root {
+  /* Gradiente Principal del Navbar */
+  --gradient-navbar: linear-gradient(135deg, #0F6E56 0%, #1D9E75 100%);
+
+  /* Colores base del gradiente */
+  --color-primary-dark: #0F6E56;   /* Verde oscuro */
+  --color-primary-light: #1D9E75;  /* Verde claro */
+
+  /* Colores secundarios */
+  --color-white: #ffffff;
+  --color-white-15: rgba(255, 255, 255, 0.15);
+  --color-white-20: rgba(255, 255, 255, 0.2);
+  --color-white-30: rgba(255, 255, 255, 0.3);
+  --color-white-80: rgba(255, 255, 255, 0.8);
+
+  /* Color de alerta/hover logout */
+  --color-red-hover: rgba(255, 100, 100, 0.4);
+  --color-red-border: rgba(255, 100, 100, 0.6);
+
+  /* Sombra del navbar */
+  --shadow-navbar: 0 6px 20px rgba(15, 110, 86, 0.3);
+}
+

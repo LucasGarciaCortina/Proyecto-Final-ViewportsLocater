@@ -1,0 +1,65 @@
+.location-widget {
+  display: inline-flex;
+  align-items: center;
+}
+
+.location-state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.location-icon {
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.location-idle {
+  background: var(--color-primary-light);
+  border-color: #d5e3ff;
+  color: white
+}
+
+.location-loading {
+  background: #f4f7ff;
+  border-color: #d5e3ff;
+  color: #5b6675;
+}
+
+.location-ok {
+  background: #e9fbef;
+  border-color: #c8f1d6;
+  color: #128a4a;
+}
+
+.location-error {
+  background: #fff5f5;
+  border-color: #ffd2d2;
+  color: #c0392b;
+}
+
+.location-coords {
+  font-family: monospace;
+  font-size: 12px;
+}
+
+.btn-location {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  background: transparent;
+  color: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.btn-location:hover {
+  opacity: 0.75;
+}

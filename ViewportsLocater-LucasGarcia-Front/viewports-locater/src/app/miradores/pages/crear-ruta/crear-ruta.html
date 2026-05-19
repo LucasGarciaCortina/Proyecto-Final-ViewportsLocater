@@ -1,0 +1,111 @@
+<div class="page">
+  <div class="header">
+    <h1>{{ rutaIdEditando ? 'Editar Ruta' : 'Añadir Ruta' }}</h1>
+    <p>{{ rutaIdEditando ? 'Modifica los datos de esta ruta' : 'Crea una nueva ruta para este mirador' }}</p>
+  </div>
+
+  @if (error) {
+  <div class="alert alert-error">{{ error }}</div>
+  }
+  @if (success) {
+  <div class="alert alert-success">{{ success }}</div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="enviar()" class="form-container">
+
+    <div class="form-group">
+      <div class="form-group">
+        <label>Nombre de la ruta *</label>
+        <input type="text" formControlName="nombre" placeholder="Ej: Sendero del Pico" class="form-input"
+          [class.is-invalid]="form.get('nombre')?.touched && form.get('nombre')?.invalid" />
+        @if (form.get('nombre')?.touched && form.get('nombre')?.invalid) {
+        <span class="error-text">El nombre es obligatorio (mínimo 3 caracteres)</span>
+        }
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Descripción</label>
+      <textarea formControlName="descripcion" placeholder="Describe la ruta..." class="form-input" rows="4"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Dificultad *</label>
+      <select formControlName="dificultad" class="form-input"
+        [class.is-invalid]="form.get('dificultad')?.touched && form.get('dificultad')?.invalid">
+        <option value="" disabled selected>Selecciona dificultad</option>
+        <option value="facil">Fácil</option>
+        <option value="media">Media</option>
+        <option value="dificil">Difícil</option>
+      </select>
+      @if (form.get('dificultad')?.touched && form.get('dificultad')?.invalid) {
+      <span class="error-text">La dificultad es obligatoria</span>
+      }
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Distancia (km) *</label>
+        <input type="number" formControlName="distancia_km" placeholder="Ej: 5.5" step="0.1" min="0.1"
+          class="form-input"
+          [class.is-invalid]="form.get('distancia_km')?.touched && form.get('distancia_km')?.invalid" />
+        @if (form.get('distancia_km')?.touched && form.get('distancia_km')?.invalid) {
+        <span class="error-text">Distancia es obligatoria</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label>Duración estimada (minutos) *</label>
+        <input type="number" formControlName="duracion_estimada_min" placeholder="Ej: 90" min="1" class="form-input"
+          [class.is-invalid]="form.get('duracion_estimada_min')?.touched && form.get('duracion_estimada_min')?.invalid" />
+        @if (form.get('duracion_estimada_min')?.touched && form.get('duracion_estimada_min')?.invalid) {
+        <span class="error-text">Duración es obligatoria</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label>Desnivel (metros)</label>
+        <input type="number" formControlName="desnivel" placeholder="Ej: 450" min="0" class="form-input" />
+      </div>
+    </div>
+
+    <!-- GPX -->
+    <div class="form-group">
+      <label>Fichero GPX <span class="optional">(opcional)</span></label>
+      @if (!gpxSeleccionado) {
+      <div class="upload-area">
+        <input type="file" id="gpx" accept=".gpx,.xml" (change)="onGpxChange($event)" class="file-input" />
+        <label for="gpx" class="upload-label">
+          <span class="upload-icon">📂</span>
+          <span class="upload-text">Haz clic para subir un fichero GPX</span>
+          <span class="upload-hint">Formato .gpx o .xml — máx. 10 MB</span>
+        </label>
+      </div>
+      }
+      @if (gpxSeleccionado) {
+      <div class="gpx-preview">
+        <span class="gpx-icon">📍</span>
+        <span class="gpx-name">{{ gpxSeleccionado.name }}</span>
+        <button type="button" class="btn-remove" (click)="eliminarGpx()">✕</button>
+      </div>
+      }
+      @if (gpxError) {
+      <span class="error-text">{{ gpxError }}</span>
+      }
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" [disabled]="loading || form.invalid">
+        @if (loading) {
+        {{ rutaIdEditando ? 'Guardando...' : 'Creando...' }}
+        } @else {
+        {{ rutaIdEditando ? 'Guardar cambios' : 'Crear Ruta' }}
+        }
+      </button>
+      <button type="button" class="btn btn-outline" (click)="cancelar()" [disabled]="loading">
+        Cancelar
+      </button>
+    </div>
+
+  </form>
+</div>

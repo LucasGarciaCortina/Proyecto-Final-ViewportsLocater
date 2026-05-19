@@ -1,0 +1,213 @@
+<div class="perfil-page">
+
+  <!-- Header del perfil -->
+  <div class="perfil-header">
+    <div class="perfil-avatar">
+      {{ (auth.user()?.name ?? 'U')[0].toUpperCase() }}
+    </div>
+    <div class="perfil-info">
+      <h1>{{ auth.user()?.name }}</h1>
+      <p>{{ auth.user()?.email }}</p>
+      <span class="perfil-rol">{{ auth.isAdmin() ? 'Administrador' : 'Usuario' }}</span>
+    </div>
+  </div>
+
+  <!-- Estadísticas -->
+  @if (estadisticas()) {
+  <div class="stats-grid">
+    <div class="stat-card">
+      <span class="stat-icon">📍</span>
+      <div class="stat-value">{{ estadisticas()!.miradores }}</div>
+      <div class="stat-label">Miradores</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">🗺️</span>
+      <div class="stat-value">{{ estadisticas()!.rutas }}</div>
+      <div class="stat-label">Rutas</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">⭐</span>
+      <div class="stat-value">{{ estadisticas()!.valoraciones }}</div>
+      <div class="stat-label">Valoraciones</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">📷</span>
+      <div class="stat-value">{{ estadisticas()!.fotos }}</div>
+      <div class="stat-label">Fotos</div>
+    </div>
+  </div>
+  }
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab" [class.active]="seccionActiva() === 'miradores'" (click)="cambiarSeccion('miradores')">
+      📍 Mis miradores
+    </button>
+    <button class="tab" [class.active]="seccionActiva() === 'rutas'" (click)="cambiarSeccion('rutas')">
+      🗺️ Mis rutas
+    </button>
+    <button class="tab" [class.active]="seccionActiva() === 'valoraciones'" (click)="cambiarSeccion('valoraciones')">
+      ⭐ Mis valoraciones
+    </button>
+  </div>
+
+  <!-- Contenido -->
+  <div class="tab-content">
+
+    @if (cargando()) {
+    <div class="loading">Cargando...</div>
+    }
+
+    <!-- Miradores -->
+    @if (seccionActiva() === 'miradores' && !cargando()) {
+    @if (miradores().length === 0) {
+    <p class="empty">Aún no has creado ningún mirador.</p>
+    } @else {
+
+    <div class="search-box">
+      <input type="text" [ngModel]="searchMiradores()"
+        (ngModelChange)="searchMiradores.set($event); paginaMiradores.set(1)"
+        placeholder="Buscar por nombre de mirador o provincia..." class="search-input" />
+    </div>
+
+    @if (miradoresFiltrados().length === 0) {
+    <p class="empty">No se encontraron miradores.</p>
+    } @else {
+    <div class="lista">
+      @for (m of miradoresPaginados(); track m.id) {
+      <div class="item-card">
+        @if (m.fotos?.length > 0) {
+        <img class="item-img" [src]="m.fotos[0].url" [alt]="m.nombre" />
+        } @else {
+        <div class="item-img item-img-placeholder">📍</div>
+        }
+        <div class="item-body">
+          <h3>{{ m.nombre }}</h3>
+          <p class="item-meta">{{ m.provincia?.nombre }}</p>
+          <p class="item-fecha">{{ m.created_at | date:'dd/MM/yyyy HH:mm' }}</p>
+          @if (m.valoraciones_avg_puntuacion) {
+          <p class="item-rating">⭐ {{ m.valoraciones_avg_puntuacion | number:'1.1-1' }}</p>
+          }
+        </div>
+        <div class="item-actions">
+          <a class="item-btn btn-primary" [routerLink]="['/miradores', m.id]">Ver</a>
+          <button class="item-btn btn-edit" (click)="editarMirador(m.id)" title="Editar mirador">
+            Editar
+          </button>
+          <button class="item-btn btn-delete" (click)="eliminarMirador(m.id)" title="Eliminar mirador">
+            Eliminar
+          </button>
+        </div>
+      </div>
+      }
+    </div>
+    @if (totalPaginasMiradores() > 1) {
+    <div class="paginador-perfil">
+      <button class="btn-pag" [disabled]="paginaMiradores() === 1" (click)="paginaMiradores.set(1)">«</button>
+      <button class="btn-pag" [disabled]="paginaMiradores() === 1"
+        (click)="paginaMiradores.update(p => p - 1)">‹</button>
+      <span class="pag-info">{{ paginaMiradores() }} / {{ totalPaginasMiradores() }}</span>
+      <button class="btn-pag" [disabled]="paginaMiradores() === totalPaginasMiradores()"
+        (click)="paginaMiradores.update(p => p + 1)">›</button>
+      <button class="btn-pag" [disabled]="paginaMiradores() === totalPaginasMiradores()"
+        (click)="paginaMiradores.set(totalPaginasMiradores())">»</button>
+    </div>
+    }
+    }
+    }
+    }
+
+    <!-- Rutas -->
+    @if (seccionActiva() === 'rutas' && !cargando()) {
+    @if (rutas().length === 0) {
+    <p class="empty">Aún no has añadido ninguna ruta.</p>
+    } @else {
+    <div class="search-box">
+      <input type="text" [ngModel]="searchRutas()" (ngModelChange)="searchRutas.set($event); paginaRutas.set(1)"
+        placeholder="Buscar por nombre de ruta o mirador..." class="search-input" />
+    </div>
+
+    @if (rutasFiltradas().length === 0) {
+    <p class="empty">No se encontraron rutas.</p>
+    } @else {
+    <div class="lista">
+      @for (r of rutasPaginadas(); track r.id) {
+      <div class="item-card">
+        <div class="item-body">
+          <h3>{{ r.nombre }}</h3>
+          <p class="item-meta">{{ r.mirador?.nombre }}</p>
+          <p class="item-fecha">{{ r.created_at | date:'dd/MM/yyyy HH:mm' }}</p>
+          <div class="item-tags">
+            @if (r.dificultad && r.dificultad !== 'null') {
+            <span class="chip chip-dificultad">{{ r.dificultad }}</span>
+            }
+            @if (r.distancia_km) {
+            <span class="chip">{{ r.distancia_km }} km</span>
+            }
+          </div>
+        </div>
+        <div class="item-actions">
+          <a class="item-btn btn-primary" [routerLink]="['/miradores', r.mirador_id, 'rutas', r.id]">Ver ruta</a>
+          <a class="item-btn btn-secondary" [routerLink]="['/miradores', r.mirador_id]">Ver mirador</a>
+          <button class="item-btn btn-edit" (click)="editarRuta(r.mirador_id, r.id)" title="Editar ruta">
+            Editar
+          </button>
+          <button class="item-btn btn-delete" (click)="eliminarRuta(r.id)" title="Eliminar ruta">
+            Eliminar
+          </button>
+        </div>
+      </div>
+      }
+    </div>
+    @if (totalPaginasRutas() > 1) {
+    <div class="paginador-perfil">
+      <button class="btn-pag" [disabled]="paginaRutas() === 1" (click)="paginaRutas.set(1)">«</button>
+      <button class="btn-pag" [disabled]="paginaRutas() === 1" (click)="paginaRutas.update(p => p - 1)">‹</button>
+      <span class="pag-info">{{ paginaRutas() }} / {{ totalPaginasRutas() }}</span>
+      <button class="btn-pag" [disabled]="paginaRutas() === totalPaginasRutas()"
+        (click)="paginaRutas.update(p => p + 1)">›</button>
+      <button class="btn-pag" [disabled]="paginaRutas() === totalPaginasRutas()"
+        (click)="paginaRutas.set(totalPaginasRutas())">»</button>
+    </div>
+    }
+    }
+    }
+    }
+
+    <!-- Valoraciones -->
+    @if (seccionActiva() === 'valoraciones' && !cargando()) {
+    @if (valoraciones().length === 0) {
+    <p class="empty">Aún no has realizado ninguna valoración.</p>
+    } @else {
+    <div class="lista">
+      @for (v of valoracionesPaginadas(); track v.id) {
+      <div class="item-card">
+        <div class="item-body">
+          <h3>{{ v.mirador?.nombre }}</h3>
+          <p class="item-stars">{{ generarEstrellas(v.puntuacion) }}</p>
+          @if (v.comentario) {
+          <p class="item-comentario">{{ v.comentario }}</p>
+          }
+          <p class="item-fecha">{{ v.created_at | date:'dd/MM/yyyy' }}</p>
+        </div>
+        <a class="item-btn btn-primary" [routerLink]="['/miradores', v.mirador_id]">Ver mirador</a>
+      </div>
+      }
+    </div>
+    @if (totalPaginasValoraciones() > 1) {
+    <div class="paginador-perfil">
+      <button class="btn-pag" [disabled]="paginaValoraciones() === 1" (click)="paginaValoraciones.set(1)">«</button>
+      <button class="btn-pag" [disabled]="paginaValoraciones() === 1"
+        (click)="paginaValoraciones.update(p => p - 1)">‹</button>
+      <span class="pag-info">{{ paginaValoraciones() }} / {{ totalPaginasValoraciones() }}</span>
+      <button class="btn-pag" [disabled]="paginaValoraciones() === totalPaginasValoraciones()"
+        (click)="paginaValoraciones.update(p => p + 1)">›</button>
+      <button class="btn-pag" [disabled]="paginaValoraciones() === totalPaginasValoraciones()"
+        (click)="paginaValoraciones.set(totalPaginasValoraciones())">»</button>
+    </div>
+    }
+    }
+    }
+
+  </div>
+</div>

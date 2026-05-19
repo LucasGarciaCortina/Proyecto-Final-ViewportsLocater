@@ -1,0 +1,146 @@
+.register-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: transparent;
+  margin-top: -100px;
+}
+
+.register-box {
+  background: #fff;
+  border-radius: 16px;
+  padding: 40px;
+  width: 100%;
+  max-width: 460px;
+  border: 1.5px solid #d8e8c8;
+}
+
+.register-logo {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.register-logo-icon {
+  font-size: 36px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.register-logo h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  letter-spacing: 0.01em;
+}
+
+.register-logo p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #7a9870;
+}
+
+.form-group {
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #3a4a38;
+  font-size: 13px;
+}
+
+.form-input {
+  padding: 11px 13px;
+  border: 1.5px solid #c8d8b8;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #f8fdf4;
+  color: #2c2c2a;
+  outline: none;
+  transition: 0.15s;
+}
+
+.form-input:focus {
+  border-color: var(--color-primary-light);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(29, 158, 117, 0.1);
+}
+
+/* Input inválido en rojo */
+.form-input.is-invalid {
+  border-color: #dc2626;
+  background-color: #fee2e2;
+}
+
+.form-input.is-invalid:focus {
+  border-color: #dc2626;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+/* Mensaje de error pequeño en rojo */
+.error-hint {
+  display: block;
+  color: #dc2626;
+  font-size: 12px;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.error {
+  background: #fef5f5;
+  border: 1.5px solid #f0c0b8;
+  color: #903030;
+  padding: 10px 13px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 14px;
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 13px;
+  background: var(--color-primary-light);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.15s;
+  margin-top: 4px;
+}
+
+.btn-submit:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
+.btn-submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.register-footer {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 13px;
+  color: #7a9870;
+}
+
+.register-footer a {
+  color: var(--color-primary-light);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.register-footer a:hover {
+  text-decoration: underline;
+}

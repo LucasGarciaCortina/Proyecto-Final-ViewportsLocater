@@ -1,0 +1,69 @@
+<div class="mirador-card">
+  <div class="mirador-media">
+    @if (distanciaKm) {
+      <div class="badge-distancia">{{ distanciaKm }}</div>
+    }
+
+    @if (distanciaUsuarioLabel) {
+      <div class="badge-distancia-usuario"> {{ distanciaUsuarioLabel }}</div>
+    }
+    @if (imageUrl) {
+      <img class="mirador-img" [src]="imageUrl" [alt]="mirador().nombre" />
+    } @else {
+      <div class="media-placeholder">
+        <span class="pin"></span>
+      </div>
+    }
+  </div>
+
+  <div class="mirador-body">
+   <div class="header-with-favorite">
+    <h3 class="mirador-title">{{ mirador().nombre }}</h3>
+
+    <button
+      class="btn-favorite-inline"
+      [class.favorited]="esFavorito()"
+      [disabled]="cargandoFavorito()"
+      (click)="toggleFavorito($event)"
+      [title]="esFavorito() ? 'Quitar de favoritos' : 'Agregar a favoritos'"
+    >
+      @if (esFavorito()) {
+        ❤️
+      } @else {
+        🤍
+      }
+    </button>
+  </div>
+
+    <div class="chips">
+      @if (provinciaNombre) {
+        <span class="chip chip-provincia">{{ provinciaNombre }}</span>
+      }
+
+      @if (dificultad) {
+        <span class="chip chip-dificultad">{{ dificultad }}</span>
+      }
+      @if (mediaValoracion !== null) {
+        <span class="chip chip-valoracion">⭐ {{ mediaValoracion }}</span>
+      }
+      @for (t of tagsVisibles; track t) {
+        <span class="chip chip-tag">{{ t }}</span>
+      }
+
+      @if (tagsExtraCount > 0) {
+        <span class="chip chip-more">+{{ tagsExtraCount }}</span>
+      }
+    </div>
+
+    @if (descripcionCorta) {
+      <p class="mirador-desc">{{ descripcionCorta }}</p>
+    }
+
+    <a class="btn-details" [routerLink]="detalleLink()">Ver detalles</a>
+  </div>
+
+  <!-- Expandable rating widget -->
+  @if (widgetVisible()) {
+    <app-rating-widget [miradorId]="mirador().id"></app-rating-widget>
+  }
+</div>

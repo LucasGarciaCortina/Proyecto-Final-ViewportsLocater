@@ -1,0 +1,120 @@
+<div class="rating-widget">
+
+  <!-- Header -->
+  <div class="widget-header">
+    <span class="widget-divider-line"></span>
+    <h3 class="widget-title">Valoraciones</h3>
+    <span class="widget-divider-line"></span>
+  </div>
+
+  <!-- Loading state -->
+  @if (cargando()) {
+    <div class="widget-loading">
+      <div class="spinner"></div>
+      <span>Cargando valoraciones...</span>
+    </div>
+  }
+
+  <!-- Error state -->
+  @if (!cargando() && error()) {
+    <div class="widget-error">
+      <span>⚠️ {{ error() }}</span>
+      <button class="btn-retry" type="button" (click)="cargarValoraciones()">Reintentar</button>
+    </div>
+  }
+
+  <!-- Loaded state -->
+  @if (!cargando() && !error()) {
+
+    <!-- Average display -->
+    <div class="avg-display">
+      @if (promedio !== null) {
+        <span class="avg-score">{{ promedio }}</span>
+        <span class="avg-max">/ 5 ⭐</span>
+        <div class="avg-stars">{{ generarEstrellas(promedio!) }}</div>
+        <span class="avg-total">({{ total }} persona{{ total !== 1 ? 's' : '' }})</span>
+      } @else {
+        <span class="avg-none">Sin valoraciones aún</span>
+      }
+    </div>
+
+    <!-- Rating form -->
+    <div class="form-section">
+      <p class="form-label-top">Tu valoración <span class="required">*</span></p>
+      <div class="star-selector" (mouseleave)="salirHoverEstrellas()">
+        @for (n of estrellas; track n) {
+          <button
+            type="button"
+            class="star-btn"
+            [class.active]="n <= (starsHover() || starsSeleccionadas())"
+            (mouseenter)="hoverEstrella(n)"
+            (click)="seleccionarEstrella(n)"
+            [attr.aria-label]="n + ' estrellas'">★</button>
+        }
+      </div>
+
+      <div class="form-field">
+        <label class="form-label">Comentario (opcional)</label>
+        <textarea
+          class="form-textarea"
+          rows="3"
+          placeholder="Cuéntanos tu experiencia..."
+          [(ngModel)]="form.comentario"
+          name="comentario"
+          maxlength="500"></textarea>
+        <span class="char-counter" [class.char-low]="caracteresRestantes < 50">
+          {{ caracteresRestantes }} caracteres restantes
+        </span>
+      </div>
+
+      @if (enviado()) {
+        <div class="form-success">✅ ¡Valoración enviada correctamente!</div>
+      }
+
+      @if (errorEnvio()) {
+        <div class="form-error">⚠️ {{ errorEnvio() }}</div>
+      }
+
+      <button
+        class="btn-submit"
+        type="button"
+        (click)="enviarValoracion()"
+        [disabled]="enviando() || form.puntuacion === 0">
+        @if (enviando()) {
+          <span class="btn-spinner"></span> Enviando...
+        } @else {
+          Enviar valoración
+        }
+      </button>
+    </div>
+
+    <!-- Reviews divider -->
+    <div class="reviews-divider">
+      <span class="divider-line"></span>
+      <span class="divider-label">Comentarios</span>
+      <span class="divider-line"></span>
+    </div>
+
+    <!-- Reviews list -->
+    @if (valoraciones().length > 0) {
+      <div class="reviews-list">
+        @for (v of valoraciones(); track v.id) {
+          <div class="review-item">
+            <div class="review-meta">
+              <span class="review-stars">{{ generarEstrellas(v.puntuacion) }}</span>
+              <span class="review-user">{{ v.user?.name ?? 'Usuario' }}</span>
+              <span class="review-date">{{ v.created_at | date:'dd/MM/yyyy' }}</span>
+            </div>
+            @if (v.comentario) {
+              <p class="review-comment">"{{ v.comentario }}"</p>
+            }
+          </div>
+        }
+      </div>
+    } @else {
+      <p class="no-reviews">Sin comentarios aún. ¡Sé el primero en opinar!</p>
+    }
+
+  }
+
+</div>

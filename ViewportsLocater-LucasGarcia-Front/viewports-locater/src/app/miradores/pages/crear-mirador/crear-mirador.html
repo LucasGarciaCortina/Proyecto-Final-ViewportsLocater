@@ -1,0 +1,227 @@
+<div class="page">
+  <div class="header">
+    <h1>{{ miradorIdEditando ? 'Editar Mirador' : 'Crear Nuevo Mirador' }}</h1>
+    <p>{{ miradorIdEditando ? 'Modifica los datos de este mirador' : 'Añade un nuevo mirador a nuestra comunidad' }}</p>
+  </div>
+
+  @if (error) {
+  <div class="alert alert-error">
+    {{ error }}
+  </div>
+  }
+
+  @if (success) {
+  <div class="alert alert-success">
+    {{ success }}
+  </div>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="crearMirador()" class="form-container">
+    <div class="form-group">
+      <label for="nombre">
+        Nombre del Mirador *
+        <span class="char-count">{{ form.get('nombre')?.value?.length || 0 }} / 150</span>
+      </label>
+      <input type="text" id="nombre" formControlName="nombre" placeholder="Ej: Mirador del Pico" class="form-input"
+        [class.is-invalid]="form.get('nombre')?.touched && form.get('nombre')?.invalid" maxlength="150" />
+      @if (form.get('nombre')?.touched && form.get('nombre')?.invalid) {
+      <span class="error-text">{{ obtenerErrorCampo('nombre') }}</span>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="descripcion">
+        Descripción *
+        <span class="char-count">{{ form.get('descripcion')?.value?.length || 0 }} / 500</span>
+      </label>
+      <textarea id="descripcion" formControlName="descripcion" placeholder="Describe el mirador en detalle..."
+        class="form-input" rows="5"
+        [class.is-invalid]="form.get('descripcion')?.touched && form.get('descripcion')?.invalid"
+        maxlength="500"></textarea>
+      @if (form.get('descripcion')?.touched && form.get('descripcion')?.invalid) {
+      <span class="error-text">{{ obtenerErrorCampo('descripcion') }}</span>
+      }
+    </div>
+
+
+    <div class="form-group">
+      <label for="provincia_id">Provincia *</label>
+      <select id="provincia_id" formControlName="provincia_id" class="form-input"
+        [class.is-invalid]="form.get('provincia_id')?.touched && form.get('provincia_id')?.invalid">
+        @if (provincias().length === 0) {
+        <option value="" disabled>Cargando provincias...</option>
+        } @else {
+        <option value="">Selecciona una provincia</option>
+        @for (provincia of provincias(); track provincia.id) {
+        <option [value]="provincia.id">{{ provincia.nombre }}</option>
+        }
+        }
+      </select>
+      @if (form.get('provincia_id')?.touched && form.get('provincia_id')?.invalid) {
+      <span class="error-text">{{ obtenerErrorCampo('provincia_id') }}</span>
+      }
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="latitud">Latitud *</label>
+        <input type="number" id="latitud" formControlName="latitud" placeholder="Ej: 40.4168" step="0.0001"
+          class="form-input" [class.is-invalid]="form.get('latitud')?.touched && form.get('latitud')?.invalid" />
+        @if (form.get('latitud')?.touched && form.get('latitud')?.invalid) {
+        <span class="error-text">{{ obtenerErrorCampo('latitud') }}</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="longitud">Longitud *</label>
+        <input type="number" id="longitud" formControlName="longitud" placeholder="Ej: -3.7038" step="0.0001"
+          class="form-input" [class.is-invalid]="form.get('longitud')?.touched && form.get('longitud')?.invalid" />
+        @if (form.get('longitud')?.touched && form.get('longitud')?.invalid) {
+        <span class="error-text">{{ obtenerErrorCampo('longitud') }}</span>
+        }
+      </div>
+    </div>
+
+    <!-- ✅ BOTÓN OBTENER UBICACIÓN - Usa GeolocationService -->
+    <div class="form-group">
+      <div class="location-buttons">
+        <button type="button" class="btn btn-secondary" (click)="obtenerUbicacion()" [disabled]="ubicacionCargando()">
+          @if (ubicacionCargando()) {
+          ⏳ Obteniendo ubicación...
+          } @else {
+          📍 Obtener mi ubicación
+          }
+        </button>
+
+        <button type="button" class="btn btn-light" (click)="abrirSelectorMapa()">
+          🗺️ Seleccionar en el mapa
+        </button>
+      </div>
+
+      @if (ubicacionError()) {
+      <span class="error-text">{{ ubicacionError() }}</span>
+      }
+    </div>
+
+    <!-- Modal/Dialog del mapa -->
+    @if (mostrarMapaSelector()) {
+    <div class="modal-overlay" (click)="cerrarSelectorMapa()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Selecciona una ubicación en el mapa</h3>
+          <button type="button" class="btn-close" (click)="cerrarSelectorMapa()">✕</button>
+        </div>
+        <div id="mapa-selector" class="mapa-selector"></div>
+        <p class="mapa-info">Haz clic en el mapa para seleccionar la ubicación</p>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" (click)="cerrarSelectorMapa()">
+            Cancelar
+          </button>
+          <button type="button" class="btn btn-primary" (click)="aceptarUbicacion()">
+            Aceptar ubicación
+          </button>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- Sección de ruta opcional -->
+    <div class="form-group">
+      <label>Ruta de acceso</label>
+      <p class="form-hint">Se creará una ruta principal con los datos de ruta que rellenes. Puedes completarla o añadir más rutas después desde el detalle del mirador.</p>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="distancia_km">Distancia (km)</label>
+        <input type="number" id="distancia_km" formControlName="distancia_km" placeholder="Ej: 5.5" step="0.1" min="0"
+          class="form-input" />
+      </div>
+
+      <div class="form-group">
+        <label for="duracion_estimada_min">Duración estimada (minutos)</label>
+        <input type="number" id="duracion_estimada_min" formControlName="duracion_estimada_min" placeholder="Ej: 90"
+          min="0" class="form-input" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="desnivel">Desnivel (metros)</label>
+      <input type="number" id="desnivel" formControlName="desnivel" placeholder="Ej: 250" min="0" class="form-input" />
+    </div>
+
+    <div class="form-group">
+      <label for="dificultad">Dificultad</label>
+      <select id="dificultad" formControlName="dificultad" class="form-input">
+        <option value="">Sin especificar</option>
+        <option value="facil">Fácil</option>
+        <option value="media">Media</option>
+        <option value="dificil">Difícil</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Imágenes del Mirador <span class="optional">(máx. 5)</span></label>
+
+      @if (imagenesSeleccionadas.length < 5) { <div class="upload-area">
+        <input type="file" id="imagen" accept=".jpg,.jpeg,.png,.webp" multiple (change)="onFileChange($event)"
+          class="file-input" />
+        <label for="imagen" class="upload-label">
+          <span class="upload-icon">📷</span>
+          <span class="upload-text">Haz clic para subir imágenes</span>
+          <span class="upload-hint">JPG, PNG o WebP — máx. 5 MB por imagen</span>
+        </label>
+    </div>
+    }
+
+    @if (imagenesPreview.length > 0) {
+    <div class="imagenes-preview-grid">
+      @for (img of imagenesPreview; track img.nombre; let i = $index) {
+      <div class="imagen-preview-item">
+        <img [src]="img.url" [alt]="img.nombre" class="imagen-thumb" />
+        <div class="imagen-item-info">
+          <span class="image-name">{{ img.nombre }}</span>
+          <span class="image-size">{{ formatearTamano(img.tamano) }}</span>
+        </div>
+        <button type="button" class="btn-remove-image" (click)="eliminarImagen(i)">✕</button>
+      </div>
+      }
+    </div>
+    }
+
+    @if (imagenError) {
+    <span class="error-text">{{ imagenError }}</span>
+    }
+</div>
+
+@if (tags().length > 0) {
+<div class="form-group">
+  <label>Tags</label>
+  <div class="tags-container">
+    @for (tag of tags(); track tag.id) {
+    <label class="tag-checkbox" [class.selected]="isTagSeleccionado(tag.id)">
+      <input type="checkbox" [checked]="isTagSeleccionado(tag.id)" (change)="toggleTag(tag.id)" />
+      {{ tag.nombre }}
+    </label>
+    }
+  </div>
+  @if (tagsSeleccionados.length > 0) {
+  <span class="tags-hint">{{ tagsSeleccionados.length }} tag(s) seleccionado(s)</span>
+  }
+</div>
+}
+
+<div class="form-actions">
+  <button type="submit" class="btn btn-primary" [disabled]="loading || form.invalid">
+    @if (loading) {
+      {{ miradorIdEditando ? 'Guardando...' : 'Creando...' }}
+    } @else {
+      {{ miradorIdEditando ? 'Guardar cambios' : 'Crear Mirador' }}
+    }
+  </button>
+  <button type="button" class="btn btn-outline" (click)="cancelar()" [disabled]="loading">
+    Cancelar
+  </button>
+</div>
+</form>
+</div>

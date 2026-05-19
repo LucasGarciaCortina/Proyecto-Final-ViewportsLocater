@@ -1,0 +1,191 @@
+<div class="detalle-ruta-container">
+  <!-- Header -->
+  <header class="ruta-header">
+    <button class="btn-back" (click)="volver()">
+      ← Volver
+    </button>
+
+    @if (esPropietario()) {
+    <div class="owner-actions">
+      <button class="btn-edit" (click)="editarRuta()" title="Editar ruta">
+        Editar
+      </button>
+      <button class="btn-delete" (click)="eliminarRuta()" title="Eliminar ruta">
+        Eliminar
+      </button>
+    </div>
+    }
+  </header>
+
+  <!-- Main content -->
+  @if (!cargando() && ruta) {
+  <main class="ruta-main">
+    <!-- Título -->
+    <section class="ruta-intro">
+      <div class="intro-text">
+        <h1 class="ruta-titulo">{{ ruta.nombre }}</h1>
+        <p class="ruta-subtitulo">{{ ruta.mirador.nombre }}</p>
+      </div>
+
+      <!-- Badges -->
+      <div class="badges-container">
+        <div class="badge" [style.background-color]="getDificultadColor() + '20'" [style.color]="getDificultadColor()">
+          ⛰️ {{ ruta.dificultad }}
+        </div>
+        <div class="badge badge-distancia">
+          📏 {{ ruta.distancia_km }} km
+        </div>
+        <div class="badge badge-tiempo">
+          ⏱️ {{ getTiempoHoras().horas }}h {{ getTiempoHoras().minutos }}min
+        </div>
+      </div>
+
+      <!-- Botones acción -->
+      <div class="action-buttons">
+        @if (ruta?.gpx_url) {
+        <button class="btn-action btn-primary" (click)="downloadGPX()">
+          📥 Descargar GPX
+        </button>
+        }
+        <button class="btn-action btn-secondary" (click)="shareRoute()">
+          📤 Compartir
+        </button>
+      </div>
+    </section>
+
+    <!-- Grid principal -->
+    <div class="ruta-grid">
+      <!-- Columna izquierda: Mapa -->
+      <div class="grid-left">
+        <section class="section-map">
+          @if (ruta?.gpx_url) {
+            <div id="mapa-ruta" class="mapa-container"></div>
+          } @else {
+            <div class="mapa-sin-gpx">
+              <span class="mapa-sin-gpx-icon">🗺️</span>
+              <p class="mapa-sin-gpx-titulo">Ruta sin trazado GPS</p>
+              <p class="mapa-sin-gpx-texto">Esta ruta no tiene fichero GPX asociado.<br>El creador puede añadirlo editando la ruta.</p>
+            </div>
+          }
+        </section>
+      </div>
+
+      <!-- Columna derecha: Detalles -->
+      <div class="grid-right">
+        <section class="section-details">
+          <div class="details-grid">
+            <div class="detail-card">
+              <div class="detail-icon">📏</div>
+              <div class="detail-content">
+                <div class="detail-label">Distancia</div>
+                <div class="detail-value">{{ ruta.distancia_km }} km</div>
+              </div>
+            </div>
+
+            <div class="detail-card">
+              <div class="detail-icon">⏱️</div>
+              <div class="detail-content">
+                <div class="detail-label">Duración</div>
+                <div class="detail-value">{{ getTiempoHoras().horas }}h {{ getTiempoHoras().minutos }}min</div>
+              </div>
+            </div>
+
+            <div class="detail-card">
+              <div class="detail-icon">⛰️</div>
+              <div class="detail-content">
+                <div class="detail-label">Dificultad</div>
+                <div class="detail-value" [style.color]="getDificultadColor()">{{ ruta.dificultad }}</div>
+              </div>
+            </div>
+
+            <div class="detail-card">
+              <div class="detail-icon">📈</div>
+              <div class="detail-content">
+                <div class="detail-label">Desnivel</div>
+                <div class="detail-value">@if (ruta?.desnivel) { +{{ ruta.desnivel }}m } @else { — }</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Descripción -->
+        <section class="section-description">
+          <h2 class="section-title">Sobre esta ruta</h2>
+          @if(ruta.descripcion){
+          <p class="description-text">{{ ruta.descripcion }}</p>
+          }@else{
+          <p class="description-text">Esta ruta no tiene descripción</p>
+          }
+        </section>
+
+        <!-- Clima -->
+        @if (ruta.mirador?.clima) {
+        <div class="detail-card">
+          <div class="detail-icon">🌡️</div>
+          <div class="detail-content">
+            <div class="detail-label">Clima actual</div>
+            <div class="detail-value">{{ getWeatherIcon(ruta.mirador.clima.condicion) }} {{
+              Math.round(ruta.mirador.clima.temperatura) }}°C</div>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+
+    <!-- PUNTO DE INICIO -->
+    @if (puntoInicio) {
+    <div class="punto-inicio-section">
+      <div class="card">
+        <h3>📍 Punto de inicio</h3>
+
+        <div class="coordinate-item">
+          <span class="coordinate-label">Latitud:</span>
+          <span class="coordinate-value">{{ puntoInicio.lat | number:'1.4-4' }}</span>
+          <button class="coordinate-copy" (click)="copiarCoordenada(puntoInicio.lat)">Copiar</button>
+        </div>
+
+        <div class="coordinate-item">
+          <span class="coordinate-label">Longitud:</span>
+          <span class="coordinate-value">{{ puntoInicio.lng | number:'1.4-4' }}</span>
+          <button class="coordinate-copy" (click)="copiarCoordenada(puntoInicio.lng)">Copiar</button>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- PUNTO FINAL -->
+    @if (puntoFinal) {
+    <div class="punto-final-section">
+      <div class="card">
+        <h3>📍 Punto final</h3>
+
+        <div class="coordinate-item">
+          <span class="coordinate-label">Latitud:</span>
+          <span class="coordinate-value">{{ puntoFinal.lat | number:'1.4-4' }}</span>
+          <button class="coordinate-copy" (click)="copiarCoordenada(puntoFinal.lat)">Copiar</button>
+        </div>
+
+        <div class="coordinate-item">
+          <span class="coordinate-label">Longitud:</span>
+          <span class="coordinate-value">{{ puntoFinal.lng | number:'1.4-4' }}</span>
+          <button class="coordinate-copy" (click)="copiarCoordenada(puntoFinal.lng)">Copiar</button>
+        </div>
+      </div>
+    </div>
+    }
+
+  </main>
+  }
+
+  <!-- Loading -->
+  @if (cargando()) {
+  <div class="loading">
+    Cargando ruta...
+  </div>
+  }
+
+  <!-- Error -->
+  @if (error()) {
+  <div class="alert alert-error">{{ error() }}</div>
+  }
+</div>

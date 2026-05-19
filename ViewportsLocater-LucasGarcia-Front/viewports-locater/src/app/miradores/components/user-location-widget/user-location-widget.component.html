@@ -1,0 +1,29 @@
+<div class="location-widget">
+  @if (cargando()) {
+    <div class="location-state location-loading">
+      <span class="location-icon">⏳</span>
+      <span>Obteniendo ubicación...</span>
+    </div>
+  } @else if (error()) {
+    <div class="location-state location-error">
+      <span class="location-icon">⚠️</span>
+      <span>{{ error() }}</span>
+      <button class="btn-location" (click)="actualizarUbicacion()">Reintentar</button>
+    </div>
+  } @else if (posicion()) {
+    <div class="location-state location-ok">
+      <span class="location-icon">📍</span>
+      <span class="location-coords">
+        {{ posicion()!.lat | number:'1.4-4' }}°,
+        {{ posicion()!.lng | number:'1.4-4' }}°
+      </span>
+      <button class="btn-location" (click)="actualizarUbicacion()">Actualizar</button>
+    </div>
+  } @else {
+    <div class="location-state location-idle">
+      <span class="location-icon">📍</span>
+      <span>Ubicación no activada</span>
+      <button class="btn-location" (click)="actualizarUbicacion()">Obtener ubicación</button>
+    </div>
+  }
+</div>

@@ -1,0 +1,254 @@
+<div class="admin-page">
+
+  <!-- Header -->
+  <div class="admin-header">
+    <h1>Panel de Administración</h1>
+    <p>Gestiona usuarios, miradores y estadísticas de la plataforma</p>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab" [class.active]="seccion() === 'estadisticas'" (click)="cambiarSeccion('estadisticas')">
+      Estadísticas
+    </button>
+    <button class="tab" [class.active]="seccion() === 'usuarios'" (click)="cambiarSeccion('usuarios')">
+      Usuarios
+    </button>
+    <button class="tab" [class.active]="seccion() === 'miradores'" (click)="cambiarSeccion('miradores')">
+      Miradores
+    </button>
+    <button class="tab" [class.active]="seccion() === 'rutas'" (click)="cambiarSeccion('rutas')">
+      Rutas
+    </button>
+    <button class="tab" [class.active]="seccion() === 'tags'" (click)="cambiarSeccion('tags')">
+      Tags
+    </button>
+  </div>
+
+  <!-- Estadísticas -->
+  @if (seccion() === 'estadisticas') {
+  @if (cargando()) {
+  <div class="loading">Cargando estadísticas...</div>
+  } @else if (estadisticas()) {
+  <div class="stats-grid">
+    <div class="stat-card">
+      <span class="stat-icon">📍</span>
+      <div class="stat-value">{{ estadisticas()!.total_miradores }}</div>
+      <div class="stat-label">Miradores</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">👥</span>
+      <div class="stat-value">{{ estadisticas()!.total_usuarios }}</div>
+      <div class="stat-label">Usuarios</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">🗺️</span>
+      <div class="stat-value">{{ estadisticas()!.total_rutas }}</div>
+      <div class="stat-label">Rutas</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">⭐</span>
+      <div class="stat-value">{{ estadisticas()!.total_valoraciones }}</div>
+      <div class="stat-label">Valoraciones</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-icon">📷</span>
+      <div class="stat-value">{{ estadisticas()!.total_fotos }}</div>
+      <div class="stat-label">Fotos</div>
+    </div>
+    <div class="charts-container">
+      <div class="chart-card">
+        <h3>Miradores por mes</h3>
+        <canvas id="graficoMiradores"></canvas>
+      </div>
+    </div>
+  </div>
+
+  }
+  }
+
+  <!-- Usuarios -->
+  @if (seccion() === 'usuarios') {
+  <div class="search-box">
+    <input type="text" [(ngModel)]="searchUsuarios" (ngModelChange)="paginaUsuarios = 1" placeholder="Buscar usuario por nombre o email..."
+      class="search-input" />
+  </div>
+
+  <div class="table-container">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th class="col-id">ID</th>
+          <th class="col-nombre">Nombre</th>
+          <th class="col-provincia">Email</th>
+          <th class="col-creador">Rol</th>
+          <th class="col-valoracion">Registro</th>
+          <th class="col-acciones">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (u of usuariosPaginados; track u.id) {
+        <tr>
+          <td class="col-id">#{{ u.id }}</td>
+          <td class="col-nombre">
+            <span class="nombre-cell">{{ u.name }}</span>
+          </td>
+          <td class="col-provincia">
+            <span class="nombre-cell">{{ u.email }}</span>
+          </td>
+          <td class="col-creador">
+            <!-- SELECT DESHABILITADO SI NO PUEDE CAMBIAR ROL -->
+            @if (puedeCambiarRol(u)) {
+            <select class="rol-select" [value]="getRol(u)" (change)="cambiarRol(u, $any($event.target).value)">
+              <option value="user">Usuario</option>
+              <option value="admin">Admin</option>
+            </select>
+            } @else {
+            <span class="rol-badge" [ngClass]="'rol-' + getRol(u)">
+              {{ getRol(u) === 'admin' ? 'Admin' : 'Usuario' }}
+            </span>
+            }
+          </td>
+          <td class="col-valoracion">{{ u.created_at | date:'dd/MM/yyyy' }}</td>
+          <td class="col-acciones">
+            <!-- BOTÓN DESHABILITADO SI NO PUEDE BORRAR -->
+            <button class="btn-delete" [disabled]="!puedeBorrarUsuario(u)"
+              [title]="!puedeBorrarUsuario(u) ? 'No puedes eliminar este usuario' : 'Eliminar usuario'"
+              (click)="eliminarUsuario(u.id)">
+              Eliminar
+            </button>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  @if (totalPaginasUsuarios > 1) {
+  <div class="paginador-admin">
+    <button class="btn-pag" [disabled]="paginaUsuarios === 1" (click)="cambiarPaginaUsuarios(1)">«</button>
+    <button class="btn-pag" [disabled]="paginaUsuarios === 1" (click)="cambiarPaginaUsuarios(paginaUsuarios - 1)">‹</button>
+    <span class="pag-info">{{ paginaUsuarios }} / {{ totalPaginasUsuarios }}</span>
+    <button class="btn-pag" [disabled]="paginaUsuarios === totalPaginasUsuarios" (click)="cambiarPaginaUsuarios(paginaUsuarios + 1)">›</button>
+    <button class="btn-pag" [disabled]="paginaUsuarios === totalPaginasUsuarios" (click)="cambiarPaginaUsuarios(totalPaginasUsuarios)">»</button>
+  </div>
+  }
+  }
+
+  <!-- Miradores -->
+  @if (seccion() === 'miradores') {
+  <div class="search-box">
+    <input type="text" [(ngModel)]="searchMiradores" (ngModelChange)="paginaMiradores = 1" placeholder="Buscar mirador por nombre o provincia..."
+      class="search-input" />
+  </div>
+
+  <div class="table-container">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th class="col-id">ID</th>
+          <th class="col-nombre">Nombre</th>
+          <th class="col-provincia">Provincia</th>
+          <th class="col-creador">Creado por</th>
+          <th class="col-valoracion">Valoración</th>
+          <th class="col-acciones">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (m of miradoresPaginados; track m.id) {
+        <tr>
+          <td class="col-id">#{{ m.id }}</td>
+          <td class="col-nombre">
+            <span class="nombre-cell" [title]="m.nombre">{{ m.nombre }}</span>
+          </td>
+          <td class="col-provincia">{{ m.provincia.nombre }}</td>
+          <td class="col-creador">{{ m.user?.name || 'Sin usuario' }}</td>
+          <td class="col-valoracion">
+            @if (m.valoraciones_avg_puntuacion) {
+            ⭐ {{ m.valoraciones_avg_puntuacion | number:'1.1-1' }}
+            } @else {
+            —
+            }
+          </td>
+          <td class="col-acciones">
+            <div class="td-actions">
+              <a class="btn-ver" [routerLink]="['/miradores', m.id]">Ver</a>
+              <button class="btn-delete" (click)="eliminarMirador(m.id)">Eliminar</button>
+            </div>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  @if (totalPaginasMiradores > 1) {
+  <div class="paginador-admin">
+    <button class="btn-pag" [disabled]="paginaMiradores === 1" (click)="cambiarPaginaMiradores(1)">«</button>
+    <button class="btn-pag" [disabled]="paginaMiradores === 1" (click)="cambiarPaginaMiradores(paginaMiradores - 1)">‹</button>
+    <span class="pag-info">{{ paginaMiradores }} / {{ totalPaginasMiradores }}</span>
+    <button class="btn-pag" [disabled]="paginaMiradores === totalPaginasMiradores" (click)="cambiarPaginaMiradores(paginaMiradores + 1)">›</button>
+    <button class="btn-pag" [disabled]="paginaMiradores === totalPaginasMiradores" (click)="cambiarPaginaMiradores(totalPaginasMiradores)">»</button>
+  </div>
+  }
+  }
+
+  <!-- Rutas -->
+  @if (seccion() === 'rutas') {
+  <div class="search-box">
+    <input type="text" [(ngModel)]="searchRutas" (ngModelChange)="paginaRutas = 1" placeholder="Buscar ruta por nombre, mirador o dificultad..."
+      class="search-input" />
+  </div>
+
+  <div class="table-container">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th class="col-id">ID</th>
+          <th class="col-nombre">Nombre</th>
+          <th class="col-provincia">Mirador</th>
+          <th class="col-creador">Creado por</th>
+          <th class="col-valoracion">Duración (min)</th>
+          <th class="col-dificultad">Dificultad</th>
+          <th class="col-acciones">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of rutasPaginadas; track r.id) {
+        <tr>
+          <td class="col-id">#{{ r.id }}</td>
+          <td class="col-nombre">
+            <span class="nombre-cell" [title]="r.nombre">{{ r.nombre }}</span>
+          </td>
+          <td class="col-provincia">
+            <span class="nombre-cell" [title]="r.mirador.nombre">{{ r.mirador.nombre }}</span>
+          </td>
+          <td class="col-creador">{{ r.user?.name || 'Sin usuario' }}</td>
+          <td class="col-valoracion">{{ r.duracion_estimada_min ?? '—' }}</td>
+          <td class="col-dificultad">{{ r.dificultad && r.dificultad !== 'null' ? r.dificultad : '—' }}</td>
+          <td class="col-acciones">
+            <div class="td-actions">
+              <a class="btn-ver" [routerLink]="['/miradores', r.mirador_id, 'rutas', r.id]">Ver</a>
+              <button class="btn-delete" (click)="eliminarRuta(r.id)">Eliminar</button>
+            </div>
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  @if (totalPaginasRutas > 1) {
+  <div class="paginador-admin">
+    <button class="btn-pag" [disabled]="paginaRutas === 1" (click)="cambiarPaginaRutas(1)">«</button>
+    <button class="btn-pag" [disabled]="paginaRutas === 1" (click)="cambiarPaginaRutas(paginaRutas - 1)">‹</button>
+    <span class="pag-info">{{ paginaRutas }} / {{ totalPaginasRutas }}</span>
+    <button class="btn-pag" [disabled]="paginaRutas === totalPaginasRutas" (click)="cambiarPaginaRutas(paginaRutas + 1)">›</button>
+    <button class="btn-pag" [disabled]="paginaRutas === totalPaginasRutas" (click)="cambiarPaginaRutas(totalPaginasRutas)">»</button>
+  </div>
+  }
+  }
+
+  <!-- Tags -->
+  @if (seccion() === 'tags') {
+    <app-tag-management></app-tag-management>
+  }
+
+</div>

@@ -1,0 +1,140 @@
+<footer class="footer">
+  <div class="footer-container">
+
+    <div class="footer-content">
+      <!-- Sección 1: Enlaces rápidos -->
+      <div class="footer-section">
+        <h4>Enlaces rápidos</h4>
+        <ul>
+          <li><a routerLink="/home">Inicio</a></li>
+          @if (auth.isLoggedIn()) {
+            <li><a routerLink="/crear-mirador">Crear mirador</a></li>
+            <li><a (click)="logout()" style="cursor:pointer">Cerrar sesión</a></li>
+          } @else {
+            <li><a routerLink="/login">Iniciar sesión</a></li>
+            <li><a routerLink="/register">Registrarse</a></li>
+          }
+        </ul>
+      </div>
+
+      <!-- Sección 2: Sobre nosotros -->
+      <div class="footer-section">
+        <h4>Información</h4>
+        <ul>
+          <li><a (click)="abrirSobreNosotros()" class="link-modal">Sobre nosotros</a></li>
+          <li><a (click)="abrirContacto()" class="link-modal">Contacto</a></li>
+        </ul>
+      </div>
+
+      <!-- Sección 3: Legal -->
+      <div class="footer-section">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Términos de servicio</a></li>
+          <li><a href="#">Política de privacidad</a></li>
+          <li><a href="#">Cookies</a></li>
+        </ul>
+      </div>
+
+      <!-- Sección 4: Redes sociales -->
+      <div class="footer-section">
+        <h4>Síguenos</h4>
+        <div class="social-links">
+          <a href="#" class="social-link">Facebook</a>
+          <a href="#" class="social-link">Instagram</a>
+          <a href="#" class="social-link">Twitter</a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Copyright -->
+    <div class="footer-bottom">
+      <p>&copy; {{ currentYear }} Viewports Locater. Todos los derechos reservados.</p>
+    </div>
+
+  </div>
+</footer>
+
+<!-- Modal Sobre nosotros -->
+@if (modalSobreNosotros()) {
+<div class="modal-overlay" (click)="cerrarSobreNosotros()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Sobre Viewports Locater</h2>
+      <button class="btn-close" (click)="cerrarSobreNosotros()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p>
+        <strong>Viewports Locater</strong> es una plataforma web colaborativa diseñada para descubrir, documentar y compartir los mejores miradores naturales.
+      </p>
+      <p>
+        Nuestro objetivo es crear una comunidad de amantes de la naturaleza que contribuyan con información detallada sobre puntos panorámicos, incluyendo rutas de acceso, niveles de dificultad, fotos y valoraciones.
+      </p>
+      <p>
+        Ya sea que busques un mirador cercano, planifiques una excursión o quieras compartir tu descubrimiento con otros usuarios, Viewports Locater te ofrece todas las herramientas que necesitas.
+      </p>
+      <h3>Características principales:</h3>
+      <ul class="modal-list">
+        <li>Búsqueda de miradores por proximidad</li>
+        <li>Filtrado avanzado por dificultad y características</li>
+        <li>Rutas de acceso con archivos GPX descargables</li>
+        <li>Sistema de valoraciones y reseñas de la comunidad</li>
+        <li>Galería de fotos de miradores</li>
+        <li>Asistente virtual para recomendaciones</li>
+      </ul>
+      <p>
+        Creado con pasión por los aventureros y exploradores que buscan los mejores puntos de vista para disfrutar de la naturaleza.
+      </p>
+    </div>
+  </div>
+</div>
+}
+
+<!-- Modal Contacto -->
+@if (modalContacto()) {
+<div class="modal-overlay" (click)="cerrarContacto()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Contacto</h2>
+      <button class="btn-close" (click)="cerrarContacto()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p>¿Tienes preguntas, sugerencias o reportar un problema? Nos encantaría escucharte.</p>
+
+      <div class="contact-info">
+        <div class="contact-item">
+          <h4>📧 Email</h4>
+          <p><a href="mailto:info@viewportslocater.com">info@viewportslocater.com</a></p>
+        </div>
+
+        <div class="contact-item">
+          <h4>📍 Ubicación</h4>
+          <p>IES Monte Naranco<br>Oviedo, Asturias, España</p>
+        </div>
+
+        <div class="contact-item">
+          <h4>🐛 Reportar un bug</h4>
+          <p><a href="mailto:soporte@viewportslocater.com">soporte@viewportslocater.com</a></p>
+        </div>
+
+        <div class="contact-item">
+          <h4>💡 Sugerencias</h4>
+          <p><a href="mailto:sugerencias@viewportslocater.com">sugerencias@viewportslocater.com</a></p>
+        </div>
+      </div>
+
+      <h3>Redes sociales</h3>
+      <div class="social-links-modal">
+        <a href="#" class="social-link-modal">Facebook</a>
+        <a href="#" class="social-link-modal">Instagram</a>
+        <a href="#" class="social-link-modal">Twitter</a>
+      </div>
+
+      <p style="margin-top: 20px; color: #7a9870; font-size: 12px;">
+        Responderemos a tu mensaje en el menor tiempo posible.
+      </p>
+    </div>
+  </div>
+</div>
+}

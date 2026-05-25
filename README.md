@@ -82,7 +82,7 @@ docker-compose.yml                        # Orquestación de los tres contenedor
 
 **1. Clonar el repositorio**
 ```bash
-git clone https://github.com/LucasGarciaCortina/Proyecto-Final
+git clone https://github.com/LucasGarciaCortina/Proyecto-Final-ViewportsLocater
 cd Proyecto-Final
 ```
 

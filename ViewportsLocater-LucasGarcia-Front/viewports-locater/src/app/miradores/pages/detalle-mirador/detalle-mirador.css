@@ -410,6 +410,8 @@
   border-radius: 10px;
   background: #f8fdf4;
   transition: border-color 0.15s;
+  overflow: hidden;
+  word-break: break-word;
 }
 
 .route-item:hover {
@@ -436,13 +438,20 @@
   font-size: 14px;
   font-weight: 600;
   color: var(--color-primary-dark);
+  word-break: break-word;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
+
 
 .route-desc {
   font-size: 13px;
   color: #6b7c6a;
   line-height: 1.5;
   margin: 0 0 10px;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 .route-meta {

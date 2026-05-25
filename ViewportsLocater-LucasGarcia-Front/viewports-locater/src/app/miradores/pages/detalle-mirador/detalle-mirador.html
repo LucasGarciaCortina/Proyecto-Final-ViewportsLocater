@@ -220,7 +220,7 @@
               @if (cargandoValoracion()) {
               <span class="btn-spinner"></span> Enviando...
               } @else {
-              ✅ Enviar
+              Enviar
               }
             </button>
           </div>
@@ -250,7 +250,7 @@
                 <button class="btn-cancel" type="button" (click)="cancelarEdicionValoracion()">Cancelar</button>
                 <button class="btn-submit" type="button" (click)="guardarEdicionValoracion(v.id)"
                   [disabled]="cargandoValoracion()">
-                  @if (cargandoValoracion()) { Guardando... } @else { ✅ Guardar }
+                  @if (cargandoValoracion()) { Guardando... } @else { Guardar }
                 </button>
               </div>
             </div>
@@ -330,12 +330,12 @@
         <div class="actions-list">
           @if (estaLogueado()) {
           <button class="action-btn" (click)="toggleFavorito()" [disabled]="cargandoFavorito()">
-            <span class="action-icon">@if (esFavorito()) { ⭐ } @else { ☆ }</span>
+            <span class="action-icon">@if (esFavorito()) { ❤️ } @else { 🤍 }</span>
             @if (esFavorito()) { Quitar de favoritos } @else { Agregar a favoritos }
           </button>
           } @else {
           <button class="action-btn" (click)="irAlLogin()" title="Inicia sesión para agregar a favoritos">
-            <span class="action-icon">☆</span> Agregar a favoritos
+            <span class="action-icon">🤍</span> Agregar a favoritos
           </button>
           }
           <a class="action-btn" [routerLink]="['/miradores', d.mirador.id, 'crear-ruta']">

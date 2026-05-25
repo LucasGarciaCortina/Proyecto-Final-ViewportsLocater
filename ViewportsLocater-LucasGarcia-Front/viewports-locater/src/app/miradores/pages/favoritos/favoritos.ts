@@ -5,6 +5,10 @@ import { MiradorService } from '../../../services/mirador-service';
 import { ItemMiradorComponent } from '../../components/item-mirador/item-mirador';
 import { Mirador } from '../../../models/mirador.interface';
 
+/**
+ * Componente de la página de favoritos del usuario autenticado.
+ * Carga y muestra los miradores que el usuario ha marcado como favoritos.
+ */
 @Component({
   selector: 'app-favoritos',
   imports: [CommonModule, RouterLink, ItemMiradorComponent],
@@ -15,29 +19,33 @@ export class FavoritosComponent implements OnInit {
   private miradorService = inject(MiradorService);
 
   favoritos = signal<Mirador[]>([]);
-  cargando = signal(true);
-  error = signal<string | null>(null);
+  cargando  = signal(true);
+  error     = signal<string | null>(null);
 
   ngOnInit(): void {
     this.cargarFavoritos();
   }
 
-cargarFavoritos(): void {
-  this.miradorService.listarFavoritos().subscribe({
-    next: (data: any[]) => {
-      const miradores = (data ?? [])
-        .map((fav) => fav.mirador)
-        .filter((m) => m && m.id);
+  /**
+   * Carga los favoritos del usuario desde el servidor.
+   * El endpoint devuelve objetos Favorito con el mirador anidado,
+   * por lo que se extrae y filtra solo los miradores válidos.
+   */
+  cargarFavoritos(): void {
+    this.miradorService.listarFavoritos().subscribe({
+      next: (data: any[]) => {
+        const miradores = (data ?? [])
+          .map((fav) => fav.mirador)      // extrae el mirador del objeto favorito
+          .filter((m) => m && m.id);      // descarta entradas nulas o sin ID
 
-      console.log('Miradores extraídos:', miradores);
-      this.favoritos.set(miradores);
-      this.cargando.set(false);
-    },
-    error: (err) => {
-      console.error('Error:', err);
-      this.error.set('Error al cargar favoritos');
-      this.cargando.set(false);
-    },
-  });
-}
+        this.favoritos.set(miradores);
+        this.cargando.set(false);
+      },
+      error: (err) => {
+        console.error('Error:', err);
+        this.error.set('Error al cargar favoritos');
+        this.cargando.set(false);
+      },
+    });
+  }
 }

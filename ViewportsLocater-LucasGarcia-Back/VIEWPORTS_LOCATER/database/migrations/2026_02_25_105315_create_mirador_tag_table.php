@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('mirador_tag', function (Blueprint $table) {
             $table->foreignId('mirador_id');
             $table->foreignId('tag_id');
-            $table->foreign('mirador_id')->references('id')->on('miradores')->onDelete('cascade');
-            $table->foreign('tag_id')->references('id')->on('tags')->onDelete('cascade');
-            $table->primary(array('mirador_id','tag_id'));
+            $table->foreign('mirador_id')->references('id')->on('miradores')->onDelete('cascade'); // si se elimina el mirador, se eliminan sus relaciones con tags
+            $table->foreign('tag_id')->references('id')->on('tags')->onDelete('cascade');          // si se elimina el tag, se eliminan sus relaciones con miradores
+            $table->primary(array('mirador_id','tag_id')); // clave primaria compuesta: evita que un mismo tag se asigne dos veces al mismo mirador
         });
     }
 

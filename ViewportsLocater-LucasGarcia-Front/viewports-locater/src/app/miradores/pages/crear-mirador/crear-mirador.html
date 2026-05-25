@@ -65,7 +65,7 @@
     <div class="form-row">
       <div class="form-group">
         <label for="latitud">Latitud *</label>
-        <input type="number" id="latitud" formControlName="latitud" placeholder="Ej: 40.4168" step="0.0001"
+        <input type="text" id="latitud" formControlName="latitud" placeholder="Ej: 40.4168" step="0.0001"
           class="form-input" [class.is-invalid]="form.get('latitud')?.touched && form.get('latitud')?.invalid" />
         @if (form.get('latitud')?.touched && form.get('latitud')?.invalid) {
         <span class="error-text">{{ obtenerErrorCampo('latitud') }}</span>
@@ -74,7 +74,7 @@
 
       <div class="form-group">
         <label for="longitud">Longitud *</label>
-        <input type="number" id="longitud" formControlName="longitud" placeholder="Ej: -3.7038" step="0.0001"
+        <input type="text" id="longitud" formControlName="longitud" placeholder="Ej: -3.7038" step="0.0001"
           class="form-input" [class.is-invalid]="form.get('longitud')?.touched && form.get('longitud')?.invalid" />
         @if (form.get('longitud')?.touched && form.get('longitud')?.invalid) {
         <span class="error-text">{{ obtenerErrorCampo('longitud') }}</span>
@@ -82,7 +82,7 @@
       </div>
     </div>
 
-    <!-- ✅ BOTÓN OBTENER UBICACIÓN - Usa GeolocationService -->
+    <!-- BOTÓN OBTENER UBICACIÓN - Usa GeolocationService -->
     <div class="form-group">
       <div class="location-buttons">
         <button type="button" class="btn btn-secondary" (click)="obtenerUbicacion()" [disabled]="ubicacionCargando()">
@@ -128,26 +128,48 @@
     <!-- Sección de ruta opcional -->
     <div class="form-group">
       <label>Ruta de acceso</label>
-      <p class="form-hint">Se creará una ruta principal con los datos de ruta que rellenes. Puedes completarla o añadir más rutas después desde el detalle del mirador.</p>
+      <p class="form-hint">Se creará una ruta principal rellenando los datos de distancia, duración y dificultad. Puedes completarla o añadir
+        más rutas después desde el detalle del mirador.</p>
     </div>
 
     <div class="form-row">
       <div class="form-group">
         <label for="distancia_km">Distancia (km)</label>
-        <input type="number" id="distancia_km" formControlName="distancia_km" placeholder="Ej: 5.5" step="0.1" min="0"
-          class="form-input" />
+        <input type="number" id="distancia_km" formControlName="distancia_km" placeholder="Ej: 5.5" step="0.1" min="0.1"
+          max="9999" class="form-input"
+          [class.is-invalid]="form.get('distancia_km')?.touched && form.get('distancia_km')?.invalid" />
+        @if (form.get('distancia_km')?.touched && form.get('distancia_km')?.errors?.['min']) {
+        <span class="error-text">La distancia mínima es 0.1 km</span>
+        }
+        @if (form.get('distancia_km')?.touched && form.get('distancia_km')?.errors?.['max']) {
+        <span class="error-text">La distancia no puede superar 9999 km</span>
+        }
       </div>
 
       <div class="form-group">
         <label for="duracion_estimada_min">Duración estimada (minutos)</label>
         <input type="number" id="duracion_estimada_min" formControlName="duracion_estimada_min" placeholder="Ej: 90"
-          min="0" class="form-input" />
+          min="1" max="99999" class="form-input"
+          [class.is-invalid]="form.get('duracion_estimada_min')?.touched && form.get('duracion_estimada_min')?.invalid" />
+        @if (form.get('duracion_estimada_min')?.touched && form.get('duracion_estimada_min')?.errors?.['min']) {
+        <span class="error-text">La duración mínima es 1 minuto</span>
+        }
+        @if (form.get('duracion_estimada_min')?.touched && form.get('duracion_estimada_min')?.errors?.['max']) {
+        <span class="error-text">La duración no puede superar 99999 minutos</span>
+        }
       </div>
     </div>
 
     <div class="form-group">
       <label for="desnivel">Desnivel (metros)</label>
-      <input type="number" id="desnivel" formControlName="desnivel" placeholder="Ej: 250" min="0" class="form-input" />
+      <input type="number" id="desnivel" formControlName="desnivel" placeholder="Ej: 250" min="0" max="9999"
+        class="form-input" [class.is-invalid]="form.get('desnivel')?.touched && form.get('desnivel')?.invalid" />
+      @if (form.get('desnivel')?.touched && form.get('desnivel')?.errors?.['max']) {
+      <span class="error-text">El desnivel no puede superar 9999 m</span>
+      }
+      @if (form.get('desnivel')?.touched && form.get('desnivel')?.errors?.['min']) {
+      <span class="error-text">El desnivel no puede ser negativo</span>
+      }
     </div>
 
     <div class="form-group">
@@ -214,9 +236,9 @@
 <div class="form-actions">
   <button type="submit" class="btn btn-primary" [disabled]="loading || form.invalid">
     @if (loading) {
-      {{ miradorIdEditando ? 'Guardando...' : 'Creando...' }}
+    {{ miradorIdEditando ? 'Guardando...' : 'Creando...' }}
     } @else {
-      {{ miradorIdEditando ? 'Guardar cambios' : 'Crear Mirador' }}
+    {{ miradorIdEditando ? 'Guardar cambios' : 'Crear Mirador' }}
     }
   </button>
   <button type="button" class="btn btn-outline" (click)="cancelar()" [disabled]="loading">

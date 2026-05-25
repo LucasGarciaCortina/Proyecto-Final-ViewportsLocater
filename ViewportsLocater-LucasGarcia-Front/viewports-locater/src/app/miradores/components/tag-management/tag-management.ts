@@ -4,11 +4,19 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 
+/**
+ * Interfaz que representa un tag del sistema.
+ */
 interface Tag {
   id: number;
   nombre: string;
 }
 
+/**
+ * Componente de gestión de tags para el panel de administración.
+ * Permite listar, crear, editar y eliminar tags.
+ * Hace las peticiones HTTP directamente sin pasar por un servicio dedicado.
+ */
 @Component({
   selector: 'app-tag-management',
   standalone: true,
@@ -18,27 +26,31 @@ interface Tag {
 })
 export class TagManagement implements OnInit {
   private http = inject(HttpClient);
-  private api = environment.apiUrl;
+  private api  = environment.apiUrl;
 
-  tags = signal<Tag[]>([]);
+  // signals de estado del listado
+  tags     = signal<Tag[]>([]);
   cargando = signal(true);
-  error = signal<string | null>(null);
+  error    = signal<string | null>(null);
 
-  // Formulario
-  mostrarFormulario = signal(false);
-  editandoId = signal<number | null>(null);
-  nombreTag = signal('');
-  cargandoGuardar = signal(false);
+  // signals de estado del formulario de creación/edición
+  mostrarFormulario  = signal(false);
+  editandoId         = signal<number | null>(null); // null si se está creando, número si se está editando
+  nombreTag          = signal('');
+  cargandoGuardar    = signal(false);
 
   ngOnInit(): void {
     this.cargarTags();
   }
 
+  /**
+   * Carga la lista completa de tags desde el servidor.
+   */
   cargarTags(): void {
     this.cargando.set(true);
     this.http.get<Tag[]>(`${this.api}/tags`).subscribe({
       next: (data) => {
-        this.tags.set(data ?? []);
+        this.tags.set(data ?? []); // usa array vacío si la respuesta es null/undefined
         this.cargando.set(false);
       },
       error: (err) => {
@@ -49,6 +61,9 @@ export class TagManagement implements OnInit {
     });
   }
 
+  /**
+   * Abre el formulario en modo creación, reseteando los campos.
+   */
   abrirFormularioNuevo(): void {
     this.editandoId.set(null);
     this.nombreTag.set('');
@@ -56,6 +71,9 @@ export class TagManagement implements OnInit {
     this.mostrarFormulario.set(true);
   }
 
+  /**
+   * Abre el formulario en modo edición, precargando los datos del tag seleccionado.
+   */
   abrirFormularioEditar(tag: Tag): void {
     this.editandoId.set(tag.id);
     this.nombreTag.set(tag.nombre);
@@ -63,6 +81,9 @@ export class TagManagement implements OnInit {
     this.mostrarFormulario.set(true);
   }
 
+  /**
+   * Cierra el formulario y resetea todos sus campos y estados.
+   */
   cerrarFormulario(): void {
     this.mostrarFormulario.set(false);
     this.editandoId.set(null);
@@ -70,6 +91,10 @@ export class TagManagement implements OnInit {
     this.error.set(null);
   }
 
+  /**
+   * Guarda el tag actual, creándolo o actualizándolo según el estado del formulario.
+   * Actualiza la lista local sin necesidad de recargar desde el servidor.
+   */
   guardarTag(): void {
     const nombre = this.nombreTag().trim();
 
@@ -87,9 +112,10 @@ export class TagManagement implements OnInit {
     this.error.set(null);
 
     if (this.editandoId()) {
-      // ACTUALIZAR
+      // modo edición: actualiza el tag existente
       this.http.put<Tag>(`${this.api}/admin/tags/${this.editandoId()}`, { nombre }).subscribe({
         next: (tagActualizado: Tag) => {
+          // reemplaza el tag editado en la lista local sin recargar todos los tags
           this.tags.update(lista =>
             lista.map(t => t.id === this.editandoId() ? tagActualizado : t)
           );
@@ -102,9 +128,10 @@ export class TagManagement implements OnInit {
         }
       });
     } else {
-      // CREAR
+      // modo creación: añade el nuevo tag y reordena alfabéticamente
       this.http.post<Tag>(`${this.api}/admin/tags`, { nombre }).subscribe({
         next: (tagNuevo: Tag) => {
+          // añade el nuevo tag y reordena la lista alfabéticamente
           this.tags.update(lista => [...lista, tagNuevo].sort((a, b) =>
             a.nombre.localeCompare(b.nombre)
           ));
@@ -119,6 +146,10 @@ export class TagManagement implements OnInit {
     }
   }
 
+  /**
+   * Elimina un tag tras confirmación del usuario.
+   * Elimina el tag de la lista local sin recargar todos los tags.
+   */
   eliminarTag(id: number, nombre: string): void {
     if (!confirm(`¿Estás seguro de que deseas eliminar el tag "${nombre}"?`)) {
       return;
@@ -126,7 +157,7 @@ export class TagManagement implements OnInit {
 
     this.http.delete(`${this.api}/admin/tags/${id}`).subscribe({
       next: () => {
-        this.tags.update(lista => lista.filter(t => t.id !== id));
+        this.tags.update(lista => lista.filter(t => t.id !== id)); // filtra el tag eliminado de la lista local
       },
       error: (err) => {
         this.error.set(err.error?.message || 'Error al eliminar el tag');

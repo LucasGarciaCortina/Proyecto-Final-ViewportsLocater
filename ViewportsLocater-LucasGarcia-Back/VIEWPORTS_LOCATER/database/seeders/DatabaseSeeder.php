@@ -30,7 +30,7 @@ class DatabaseSeeder extends Seeder
         Mirador::factory(20)->create();
         Ruta::factory(40)->create();
         Foto::factory(60)->create();
-        $this->call(TagSeeder::class);
+        $this->call(TagsSeeder::class);
         $this->call(MiradorTagSeeder::class);
     }
 }

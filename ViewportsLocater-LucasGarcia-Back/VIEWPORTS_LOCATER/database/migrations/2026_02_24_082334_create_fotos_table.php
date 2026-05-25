@@ -15,11 +15,11 @@ return new class extends Migration
             $table->id();
 
             $table->string('url', 500);
-            $table->timestamp('fecha_subida')->useCurrent();
+            $table->timestamp('fecha_subida')->useCurrent(); // se rellena automáticamente con la fecha y hora actual al insertar
             $table->timestamps();
 
-            $table->foreignId('mirador_id')->constrained('miradores')->onDelete('cascade');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('mirador_id')->constrained('miradores')->onDelete('cascade'); // si se elimina el mirador, se eliminan también sus fotos
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');        // si se elimina el usuario, se eliminan también sus fotos
         });
     }
 

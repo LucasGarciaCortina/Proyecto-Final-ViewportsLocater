@@ -1,63 +1,66 @@
 <div class="register-container">
-  <div class="register-box">
-    <div class="register-logo">
-      <span class="register-logo-icon">📍</span>
-      <h1>VIEWPORTS LOCATER</h1>
-      <p>Únete a nuestra comunidad</p>
-    </div>
+  <div class="register-wrapper">
+    <button class="btn-back" (click)="volver()">← Volver</button>
+    <div class="register-box">
+      <div class="register-logo">
+        <span class="register-logo-icon">📍</span>
+        <h1>VIEWPORTS LOCATER</h1>
+        <p>Únete a nuestra comunidad</p>
+      </div>
 
-    <form (ngSubmit)="onSubmit()">
-      <div class="form-group">
-        <label>Nombre</label>
-        <input class="form-input" [class.is-invalid]="name() && !isNameValid()" type="text" [(ngModel)]="name"
-          [ngModelOptions]="{updateOn: 'change'}" name="name" required />
-        @if (name() && !isNameValid()) {
-        <span class="error-hint">El nombre debe tener al menos 3 caracteres</span>
+      <form (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label>Nombre</label>
+          <input class="form-input" [class.is-invalid]="name() && !isNameValid()" type="text" [(ngModel)]="name"
+            [ngModelOptions]="{updateOn: 'change'}" name="name" required />
+          @if (name() && !isNameValid()) {
+            <span class="error-hint">El nombre debe tener al menos 3 caracteres</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>Email</label>
+          <input class="form-input" [class.is-invalid]="email() && !isValidEmail(email())" type="email"
+            [(ngModel)]="email" [ngModelOptions]="{updateOn: 'change'}" name="email" required />
+          @if (email() && !isValidEmail(email())) {
+            <span class="error-hint">El email no es válido</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input class="form-input" [class.is-invalid]="password() && !isPasswordValid()" type="password"
+            [(ngModel)]="password" [ngModelOptions]="{updateOn: 'change'}" name="password" required />
+          @if (password() && !isPasswordValid()) {
+            <span class="error-hint">Mínimo 8 caracteres</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>Confirmar contraseña</label>
+          <input class="form-input" [class.is-invalid]="password_confirmation() && !isPasswordMatch()" type="password"
+            [(ngModel)]="password_confirmation" [ngModelOptions]="{updateOn: 'change'}" name="password_confirmation"
+            required />
+          @if (password_confirmation() && !isPasswordMatch()) {
+            <span class="error-hint">Las contraseñas no coinciden</span>
+          }
+        </div>
+
+        @if (error()) {
+          <div class="error">
+            <span class="error-icon">⚠️</span>
+            {{ error() }}
+          </div>
         }
+
+        <button class="btn-submit" type="submit" [disabled]="loading() || !isFormValid()">
+          {{ loading() ? 'Registrando...' : 'Crear cuenta' }}
+        </button>
+      </form>
+
+      <div class="register-footer">
+        ¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a>
       </div>
-
-      <div class="form-group">
-        <label>Email</label>
-        <input class="form-input" [class.is-invalid]="email() && !isValidEmail(email())" type="email"
-          [(ngModel)]="email" [ngModelOptions]="{updateOn: 'change'}" name="email" required />
-        @if (email() && !isValidEmail(email())) {
-        <span class="error-hint">El email no es válido</span>
-        }
-      </div>
-
-      <div class="form-group">
-        <label>Contraseña</label>
-        <input class="form-input" [class.is-invalid]="password() && !isPasswordValid()" type="password"
-          [(ngModel)]="password" [ngModelOptions]="{updateOn: 'change'}" name="password" required />
-        @if (password() && !isPasswordValid()) {
-        <span class="error-hint">Mínimo 8 caracteres</span>
-        }
-      </div>
-
-      <div class="form-group">
-        <label>Confirmar contraseña</label>
-        <input class="form-input" [class.is-invalid]="password_confirmation() && !isPasswordMatch()" type="password"
-          [(ngModel)]="password_confirmation" [ngModelOptions]="{updateOn: 'change'}" name="password_confirmation"
-          required />
-        @if (password_confirmation() && !isPasswordMatch()) {
-        <span class="error-hint">Las contraseñas no coinciden</span>
-        }
-      </div>
-
-      @if (error()) {
-      <div class="error">
-        <span class="error-icon">⚠️</span>
-        {{ error() }}
-      </div>
-      }
-
-      <button class="btn-submit" type="submit" [disabled]="loading() || !isFormValid()">
-        {{ loading() ? 'Registrando...' : 'Crear cuenta' }}
-      </button>
-    </form>
-
-    <div class="register-footer">
-      ¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a>
     </div>
   </div>
 </div>

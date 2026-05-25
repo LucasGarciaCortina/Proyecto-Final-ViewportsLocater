@@ -108,6 +108,8 @@
   border-radius: 14px;
   padding: 24px;
   margin-bottom: 20px;
+  overflow: hidden;
+  word-break: break-word;
 }
 
 .intro-text { margin-bottom: 16px; }
@@ -118,6 +120,9 @@
   font-weight: 700;
   color: var(--color-primary-dark);
   letter-spacing: -0.02em;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 .ruta-subtitulo {
@@ -127,6 +132,8 @@
   display: flex;
   align-items: center;
   gap: 5px;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 /* BADGES */
@@ -312,6 +319,9 @@
   color: #5a7a50;
   line-height: 1.65;
   margin: 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
 }
 
 /* PUNTO DE INICIO */

@@ -263,6 +263,14 @@
   background: #f0f7eb;
 }
 
+.char-count {
+  display: block;
+  text-align: right;
+  font-size: 11px;
+  color: #999;
+  margin-top: 2px;
+}
+
 /* Responsive */
 @media (max-width: 480px) {
   .form-row {

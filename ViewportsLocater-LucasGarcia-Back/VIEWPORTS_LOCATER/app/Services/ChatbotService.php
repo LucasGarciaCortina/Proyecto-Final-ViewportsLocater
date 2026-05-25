@@ -15,11 +15,26 @@ class ChatbotService
     private $model = 'gpt-4o-mini';
 
     private const TAGS_BD = [
-        'Accesible', 'Montaña', 'Costa', 'Bosque', 'Valle',
-        'Urbano', 'Rural', 'Cascada', 'Lago', 'Río',
-        'Apto para niños', 'Parking cercano', 'Zona de picnic',
-        'Difícil acceso', 'Sendero señalizado', 'Vista al mar',
-        'Vista a la ciudad', 'Amanecer', 'Atardecer', 'Panorámico',
+        'Accesible',
+        'Montaña',
+        'Costa',
+        'Bosque',
+        'Valle',
+        'Urbano',
+        'Rural',
+        'Cascada',
+        'Lago',
+        'Río',
+        'Apto para niños',
+        'Parking cercano',
+        'Zona de picnic',
+        'Difícil acceso',
+        'Sendero señalizado',
+        'Vista al mar',
+        'Vista a la ciudad',
+        'Amanecer',
+        'Atardecer',
+        'Panorámico',
     ];
 
     private const DIFICULTADES_BD = ['facil', 'media', 'dificil'];
@@ -81,7 +96,6 @@ class ChatbotService
             }
 
             return $this->searchViewpoints($content);
-
         } catch (\Exception $e) {
             Log::error('ChatbotService error: ' . $e->getMessage());
             return $this->errorResponse('Error inesperado. Inténtalo de nuevo.');
@@ -152,7 +166,7 @@ PROMPT;
         $query = Mirador::query();
         $usaHaversine = false;
 
-        // OPCIÓN A — Filtro por provincia exacta (JOIN con tabla provincias)
+        // Filtro por provincia exacta (JOIN con tabla provincias)
         if (!empty($criteria['provincia'])) {
             $nombreProvincia = $criteria['provincia'];
             $query->whereHas('provincia', function ($q) use ($nombreProvincia) {
@@ -160,7 +174,7 @@ PROMPT;
             });
         }
 
-        // OPCIÓN B — Filtro por radio desde ciudad concreta
+        // Filtro por radio desde ciudad concreta
         if (empty($criteria['provincia']) && !empty($criteria['ciudad']) && !empty($criteria['radius'])) {
             $coords = $this->getCiudadCoordinates($criteria['ciudad']);
             if ($coords) {
@@ -170,7 +184,7 @@ PROMPT;
                     'miradores.*, (6371 * acos(cos(radians(?)) * cos(radians(latitud)) * cos(radians(longitud) - radians(?)) + sin(radians(?)) * sin(radians(latitud)))) AS distancia_chatbot',
                     [$lat, $lng, $lat]
                 )->havingRaw('distancia_chatbot <= ?', [$radius])
-                 ->orderByRaw('distancia_chatbot ASC');
+                    ->orderByRaw('distancia_chatbot ASC');
                 $usaHaversine = true;
             }
         }
@@ -198,8 +212,8 @@ PROMPT;
         // Filtro por valoración mínima
         if (!empty($criteria['min_rating']) && is_numeric($criteria['min_rating'])) {
             $query->leftJoin('valoraciones', 'miradores.id', '=', 'valoraciones.mirador_id')
-                  ->groupBy('miradores.id')
-                  ->havingRaw('AVG(valoraciones.puntuacion) >= ?', [(float) $criteria['min_rating']]);
+                ->groupBy('miradores.id')
+                ->havingRaw('AVG(valoraciones.puntuacion) >= ?', [(float) $criteria['min_rating']]);
         }
 
         $miradores = $query
@@ -263,7 +277,7 @@ PROMPT;
                     'miradores.*, (6371 * acos(cos(radians(?)) * cos(radians(latitud)) * cos(radians(longitud) - radians(?)) + sin(radians(?)) * sin(radians(latitud)))) AS distancia_chatbot',
                     [$lat, $lng, $lat]
                 )->havingRaw('distancia_chatbot <= ?', [(float) $criteria['radius']])
-                 ->orderByRaw('distancia_chatbot ASC');
+                    ->orderByRaw('distancia_chatbot ASC');
             }
         } else {
             return collect();

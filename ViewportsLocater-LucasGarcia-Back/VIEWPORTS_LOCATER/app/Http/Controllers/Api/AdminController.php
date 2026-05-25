@@ -11,11 +11,26 @@ use App\Models\Valoracion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * Controlador de administración.
+ * Gestiona las operaciones exclusivas del panel de administrador:
+ * estadísticas globales, gestión de usuarios, miradores y rutas.
+ */
 class AdminController extends Controller
 {
+    /**
+     * ID del usuario administrador del sistema.
+     * Este usuario está protegido y no puede ser eliminado ni modificado.
+     */
     private const ADMIN_SYSTEM_ID = 4;
 
     // ── Estadísticas globales ──────────────────────────────────────
+
+    /**
+     * Devuelve estadísticas globales de la plataforma en formato JSON.
+     * Incluye conteos de miradores, usuarios, rutas, valoraciones y fotos,
+     * así como el número de miradores creados por mes en el año actual.
+     */
     public function estadisticas()
     {
         return response()->json([
@@ -33,6 +48,11 @@ class AdminController extends Controller
     }
 
     // ── Gestión de usuarios ────────────────────────────────────────
+
+    /**
+     * Devuelve la lista completa de usuarios con sus roles,
+     * ordenados por fecha de creación descendente.
+     */
     public function usuarios()
     {
         return response()->json(
@@ -40,6 +60,12 @@ class AdminController extends Controller
         );
     }
 
+    /**
+     * Elimina un usuario del sistema.
+     * Protege al administrador del sistema y no permite que un admin se elimine a sí mismo.
+     *
+     * @param User $user Usuario a eliminar (inyectado por route model binding)
+     */
     public function destroyUsuario(User $user)
     {
         // NO PERMITIR BORRAR AL ADMIN DEL SISTEMA
@@ -58,11 +84,17 @@ class AdminController extends Controller
             );
         }
 
-
         $user->delete();
         return response()->json(['message' => 'Usuario eliminado correctamente.']);
     }
 
+    /**
+     * Asigna un rol ('user' o 'admin') a un usuario.
+     * Protege al administrador del sistema y evita que un admin se quite su propio rol.
+     *
+     * @param Request $request Petición con el campo 'role'
+     * @param User $user Usuario al que se le asigna el rol (inyectado por route model binding)
+     */
     public function asignarRol(Request $request, User $user)
     {
         $request->validate([
@@ -85,12 +117,17 @@ class AdminController extends Controller
             );
         }
 
-         $user->syncRoles([$request->role]);
+        $user->syncRoles([$request->role]);
 
         return response()->json(['message' => 'Rol actualizado correctamente.']);
     }
 
     // ── Gestión de miradores ───────────────────────────────────────
+
+    /**
+     * Devuelve la lista completa de miradores con sus relaciones
+     * (provincia, usuario creador y valoraciones), ordenados por fecha de creación descendente.
+     */
     public function miradores()
     {
         return Mirador::with('provincia', 'user', 'valoraciones')
@@ -98,6 +135,11 @@ class AdminController extends Controller
             ->get();
     }
 
+    /**
+     * Elimina un mirador del sistema.
+     *
+     * @param Mirador $mirador Mirador a eliminar (inyectado por route model binding)
+     */
     public function destroyMirador(Mirador $mirador)
     {
         $mirador->delete();
@@ -105,6 +147,11 @@ class AdminController extends Controller
     }
 
     // ── Gestión de rutas ───────────────────────────────────────
+
+    /**
+     * Devuelve la lista completa de rutas con el nombre del mirador asociado
+     * y el usuario creador, ordenadas por fecha de creación descendente.
+     */
     public function rutas()
     {
         return response()->json(
@@ -114,6 +161,11 @@ class AdminController extends Controller
         );
     }
 
+    /**
+     * Elimina una ruta del sistema.
+     *
+     * @param Ruta $ruta Ruta a eliminar (inyectado por route model binding)
+     */
     public function destroyRuta(Ruta $ruta)
     {
         $ruta->delete();

@@ -16,20 +16,20 @@ return new class extends Migration
             $table->string('nombre', 150);
             $table->text('descripcion')->nullable();
 
-            $table->decimal('latitud', 9, 6);
+            $table->decimal('latitud', 9, 6);  // 9 dígitos en total, 6 decimales: precisión suficiente para coordenadas GPS (~1 metro)
             $table->decimal('longitud', 9, 6);
 
             $table->timestamps();
 
             $table->foreignId('provincia_id')
               ->constrained('provincias')
-              ->restrictOnDelete();
+              ->restrictOnDelete(); // impide eliminar una provincia si tiene miradores asociados
 
             $table->foreignId('user_id')
               ->constrained('users')
-              ->onDelete('cascade');
+              ->onDelete('cascade'); // si se elimina el usuario, se eliminan también sus miradores
 
-            $table->index(['latitud', 'longitud']);
+            $table->index(['latitud', 'longitud']); // índice compuesto para optimizar las consultas de búsqueda por coordenadas (Haversine)
         });
     }
 

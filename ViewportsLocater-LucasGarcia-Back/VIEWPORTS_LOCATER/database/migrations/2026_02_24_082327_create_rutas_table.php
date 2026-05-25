@@ -16,23 +16,23 @@ return new class extends Migration
             $table->string('nombre', 150);
             $table->text('descripcion')->nullable();
 
-            $table->decimal('distancia_km', 6, 2)->nullable();
-            $table->integer('desnivel')->nullable();
-            $table->unsignedInteger('duracion_estimada_min')->nullable();
+            $table->decimal('distancia_km', 6, 2)->nullable();   // hasta 9999.99 km, nullable porque puede calcularse del GPX
+            $table->integer('desnivel')->nullable();              // desnivel acumulado en metros, nullable si no se conoce
+            $table->unsignedInteger('duracion_estimada_min')->nullable(); // duración en minutos, sin signo porque no puede ser negativa
 
-            $table->string('dificultad', 30)->nullable();
+            $table->string('dificultad', 30)->nullable(); // valores esperados: 'facil', 'media', 'dificil'
 
-            $table->string('enlace_maps', 500)->nullable();
-            $table->string('gpx_url', 500)->nullable();
+            $table->string('enlace_maps', 500)->nullable(); // URL externa a Google Maps u similar
+            $table->string('gpx_url', 500)->nullable();     // URL pública del fichero GPX almacenado en el servidor
             $table->timestamps();
 
             $table->foreignId('mirador_id')
               ->constrained('miradores')
-              ->onDelete('cascade');
+              ->onDelete('cascade'); // si se elimina el mirador, se eliminan también sus rutas
 
             $table->foreignId('user_id')
               ->constrained('users')
-              ->onDelete('cascade');
+              ->onDelete('cascade'); // si se elimina el usuario, se eliminan también sus rutas
         });
     }
 

@@ -1,12 +1,20 @@
 .register-container {
-  min-height: 100vh;
+  min-height: calc(100vh - 200px); /* resta la altura del navbar */
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24px;
   background: transparent;
-  margin-top: -100px;
+  margin-top: 0;  /* reduce este valor */
 }
+
+.register-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 460px;
+}
+
 
 .register-box {
   background: #fff;
@@ -143,4 +151,27 @@
 
 .register-footer a:hover {
   text-decoration: underline;
+}
+
+.btn-back {
+  align-self: flex-start;
+  margin-bottom: 12px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1.5px solid #c8d8b8;
+  background: #fff;
+  color: #4a6040;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: 0.15s;
+}
+
+.btn-back:hover {
+  background: #f0f7eb;
+  border-color: var(--color-primary-light);
+  color: #2c4a20;
 }

@@ -3,7 +3,13 @@ import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
+import { Location } from '@angular/common';
 
+/**
+ * Componente de inicio de sesión.
+ * Gestiona el formulario de login con validaciones en cliente
+ * antes de enviar las credenciales al servidor.
+ */
 @Component({
   selector: 'app-login',
   imports: [FormsModule, RouterLink, CommonModule],
@@ -11,15 +17,20 @@ import { CommonModule } from '@angular/common';
   styleUrl: './login.css',
 })
 export class Login {
+  // signals que actúan como estado reactivo del componente
   email = signal('');
   password = signal('');
   error = signal('');
   loading = signal(false);
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(private auth: AuthService, private router: Router, private location: Location) {}
 
+  /**
+   * Valida el formulario y envía las credenciales al servidor.
+   * Si hay errores de validación los muestra sin llegar a hacer la petición.
+   */
   onSubmit() {
-    // Validaciones ANTES de enviar
+    // validaciones ANTES de enviar para evitar peticiones innecesarias
     if (!this.email()) {
       this.error.set('Por favor ingresa tu email');
       return;
@@ -35,7 +46,7 @@ export class Login {
       return;
     }
 
-    if (this.loading()) return;
+    if (this.loading()) return; // evita múltiples envíos si ya hay una petición en curso
 
     this.error.set('');
     this.loading.set(true);
@@ -46,15 +57,15 @@ export class Login {
     }).subscribe({
       next: () => {
         this.loading.set(false);
-        this.router.navigate(['/home']);
+        this.router.navigate(['/home']); // redirige al inicio tras login exitoso
       },
       error: (err) => {
         this.loading.set(false);
 
         if (err.error?.message) {
-          this.error.set(err.error.message);
+          this.error.set(err.error.message); // muestra el mensaje de error del servidor si existe
         } else if (err.status === 401 || err.status === 422) {
-          this.error.set('Email o contraseña incorrectos');
+          this.error.set('Email o contraseña incorrectos'); // error genérico para no dar pistas sobre qué campo es incorrecto
         } else {
           this.error.set('Error al iniciar sesión. Intenta de nuevo.');
         }
@@ -62,14 +73,28 @@ export class Login {
     });
   }
 
+  /**
+   * Valida el formato del email mediante expresión regular.
+   */
   isValidEmail(email: string): boolean {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // verifica que tenga formato usuario@dominio.extension
     return regex.test(email);
   }
 
+  /**
+   * Comprueba que todos los campos del formulario son válidos
+   * para habilitar o deshabilitar el botón de envío.
+   */
   isFormValid(): boolean {
     return this.email().length > 0 &&
            this.isValidEmail(this.email()) &&
            this.password().length > 0;
+  }
+
+  /**
+   * Navega a la página anterior del historial del navegador.
+   */
+  volver(): void {
+    this.location.back();
   }
 }

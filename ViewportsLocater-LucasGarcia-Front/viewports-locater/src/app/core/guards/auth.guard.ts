@@ -2,7 +2,10 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
-// Guard: solo usuarios logueados
+/**
+ * Guard que protege rutas que requieren autenticación.
+ * Si el usuario no está logueado, redirige al login.
+ */
 export const authGuard: CanActivateFn = () => {
   const auth   = inject(AuthService);
   const router = inject(Router);
@@ -13,16 +16,20 @@ export const authGuard: CanActivateFn = () => {
   return false;
 };
 
-// Guard: solo administradores — fuerza refresh de sesión antes de verificar
+/**
+ * Guard que protege rutas exclusivas de administrador.
+ * Fuerza un refresco de sesión desde el servidor antes de verificar el rol,
+ * para evitar que un rol cacheado en localStorage dé acceso indebido.
+ */
 export const adminGuard: CanActivateFn = () => {
   const auth   = inject(AuthService);
   const router = inject(Router);
 
-  // Forzar refresh para que el rol venga del servidor, no solo del localStorage
+  // fuerza refresh para que el rol venga del servidor y no del localStorage cacheado
   auth.refreshSession();
 
   if (auth.isAdmin()) return true;
 
-  router.navigate(['/home']);
+  router.navigate(['/home']); // redirige al inicio si no es administrador
   return false;
 };

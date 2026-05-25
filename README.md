@@ -24,7 +24,6 @@ Desarrollado como Proyecto Final de Ciclo del CFGS Desarrollo de Aplicaciones We
 ### Usuario no registrado
 - Ver los 6 miradores mejor valorados
 - Consultar el detalle de cualquier mirador: fotos, descripción, rutas, clima y valoraciones
-- Visualizar el trazado GPX de rutas en el mapa interactivo
 
 ### Usuario registrado
 - Búsqueda y filtrado avanzado: provincia, dificultad, proximidad, etiquetas y valoración mínima
@@ -35,6 +34,7 @@ Desarrollado como Proyecto Final de Ciclo del CFGS Desarrollo de Aplicaciones We
 - Gestionar lista de favoritos
 - Chatbot de recomendación con IA en lenguaje natural
 - Perfil con estadísticas propias
+- Visualizar el trazado GPX de rutas en el mapa interactivo
 
 ### Administrador
 - Panel de administración con estadísticas globales y gráfico mensual
